@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur 440Hz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .frequency {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        label {
+            display: block;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 80px;
+            text-align: center;
+        }
+        
+        .time-display {
+            font-size: 36px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            background: #eee;
+            border-radius: 10px;
+            height: 10px;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            background: #4CAF50;
+            height: 100%;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 1s;
+        }
+        
+        button {
+            padding: 12px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .btn-start { background: #4CAF50; color: white; }
+        .btn-stop { background: #f44336; color: white; }
+        .btn-test { background: #2196F3; color: white; }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        .hidden { display: none; }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Générateur 440Hz</h1>
+        
+        <div class="frequency">440 Hz (La3)</div>
+        
+        <div id="setup" class="controls">
+            <label>Durée (minutes):</label>
+            <input type="number" id="minutes" value="1" min="1" max="60">
+            
+            <label>Volume:</label>
+            <input type="range" id="volume" min="0" max="50" value="20">
+            <span id="volumeText">20%</span>
+        </div>
+        
+        <div id="timer" class="hidden">
+            <div class="time-display" id="timeLeft">00:00</div>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div>
+            <button id="startBtn" class="btn-start">▶ Démarrer</button>
+            <button id="stopBtn" class="btn-stop hidden">⏹ Arrêter</button>
+        </div>
+        
+        <div class="warning">
+            ⚠️ Utilisez un volume modéré pour protéger votre audition
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let audioContext = null;
+        let oscillator = null;
+        let gainNode = null;
+        let isPlaying = false;
+        let timer = null;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+
+        // Éléments HTML
+        const minutesInput = document.getElementById('minutes');
+        const volumeSlider = document.getElementById('volume');
+        const volumeText = document.getElementById('volumeText');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const testBtn = document.getElementById('testBtn');
+        const setupDiv = document.getElementById('setup');
+        const timerDiv = document.getElementById('timer');
+        const timeLeftSpan = document.getElementById('timeLeft');
+        const progressBar = document.getElementById('progressBar');
+
+        // Mettre à jour l'affichage du volume
+        volumeSlider.addEventListener('input', function() {
+            volumeText.textContent = this.value + '%';
+            if (gainNode) {
+                gainNode.gain.value = this.value / 100 * 0.5;
+            }
+        });
+
+        // Fonction pour créer le son
+        function createSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+            
+            oscillator.frequency.value = 440; // 440 Hz
+            oscillator.type = 'sine';
+            gainNode.gain.value = volumeSlider.value / 100 * 0.5;
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            isPlaying = true;
+        }
+
+        // Fonction pour arrêter le son
+        function stopSound() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator = null;
+                gainNode = null;
+                isPlaying = false;
+            }
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            
+            // Remettre l'interface normale
+            setupDiv.classList.remove('hidden');
+            timerDiv.classList.add('hidden');
+            startBtn.classList.remove('hidden');
+            stopBtn.classList.add('hidden');
+            testBtn.textContent = '🔊 Test';
+        }
+
+        // Fonction pour formater le temps
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+        }
+
+        // Bouton Démarrer
+        startBtn.addEventListener('click', function() {
+            totalSeconds = parseInt(minutesInput.value) * 60;
+            remainingSeconds = totalSeconds;
+            
+            createSound();
+            
+            // Changer l'interface
+            setupDiv.classList.add('hidden');
+            timerDiv.classList.remove('hidden');
+            startBtn.classList.add('hidden');
+            stopBtn.classList.remove('hidden');
+            
+            // Démarrer le décompte
+            timer = setInterval(function() {
+                remainingSeconds--;
+                timeLeftSpan.textContent = formatTime(remainingSeconds);
+                
+                // Mettre à jour la barre de progression
+                const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
+                progressBar.style.width = progress + '%';
+                
+                if (remainingSeconds <= 0) {
+                    stopSound();
+                }
+            }, 1000);
+            
+            // Affichage initial
+            timeLeftSpan.textContent = formatTime(remainingSeconds);
+        });
+
+        // Bouton Arrêter
+        stopBtn.addEventListener('click', stopSound);
+
+        // Bouton Test
+        testBtn.addEventListener('click', function() {
+            if (!isPlaying || timer) { // Si pas en cours ou si c'est le timer
+                createSound();
+                testBtn.textContent = '⏸ Arrêter Test';
+            } else {
+                stopSound();
+            }
+        });
+    </script>
+</body>
+</html>
