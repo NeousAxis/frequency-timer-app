@@ -1,274 +1,813 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Générateur 440Hz</title>
+    <title>Neuro-Respiration & Fréquences</title>
     <style>
+        :root {
+            --primary: #4A90E2;
+            --accent: #FF6B6B;
+            --text-dark: #2D3748;
+            --text-light: #718096;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            color: var(--text-dark);
             margin: 0;
-            padding: 20px;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 1s ease;
         }
-        
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+        /* Glassmorphism Container */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            z-index: 10;
             text-align: center;
-            max-width: 400px;
-            width: 100%;
         }
-        
+
         h1 {
-            color: #333;
-            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #2D3748, #4A90E2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        
-        .frequency {
-            background: #ff6b6b;
-            color: white;
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        /* Mode Selection Cards */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            text-align: left;
+            padding-left: 5px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 5px;
+        }
+
+        .mode-info-box {
+            grid-column: 1 / -1;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            background: rgba(255, 255, 255, 0.4);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 5px;
+            line-height: 1.4;
+            display: none;
+            /* Cache par défaut */
+            border-left: 3px solid var(--primary);
+            text-align: left;
+        }
+
+        .mode-card {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             padding: 15px;
-            border-radius: 10px;
-            font-size: 24px;
-            font-weight: bold;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .mode-card.active {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .mode-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .mode-desc {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Breathing Visualizer */
+        .visualizer-container {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .breathing-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4A90E2, #63b3ed);
+            box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+            transition: transform 0.1s linear;
+            /* Dynamically updated by JS for smoothness or CSS animation */
+            position: relative;
+            z-index: 5;
+        }
+
+        .breathing-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-light);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* Guide Circles (Ripples) */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px solid rgba(74, 144, 226, 0.1);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        }
+
+        /* Controls */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .time-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-main {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 14px rgba(74, 144, 226, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-main:active {
+            transform: translateY(0);
+        }
+
+        .btn-main.active {
+            background: #FF6B6B;
+            box-shadow: 0 4px 14px rgba(255, 107, 107, 0.3);
+        }
+
+        .posture-hint {
+            margin-top: -10px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            font-weight: 500;
+            opacity: 0.8;
+            min-height: 20px;
+            transition: opacity 0.3s;
+        }
+
+        /* View Management */
+        .view-setup {
+            transition: opacity 0.3s ease;
+        }
+
+        .view-session {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 20px 0;
+            min-height: 300px;
+        }
+
+        .view-session.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Header Layout */
+        .glass-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 20px;
         }
-        
-        .controls {
-            margin: 20px 0;
+
+        .header-content {
+            text-align: left;
         }
-        
-        label {
-            display: block;
-            margin: 10px 0 5px 0;
-            font-weight: bold;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            margin: 10px 0;
-        }
-        
-        input[type="number"] {
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            width: 80px;
-            text-align: center;
-        }
-        
-        .time-display {
-            font-size: 36px;
-            font-weight: bold;
-            color: #333;
-            margin: 20px 0;
-        }
-        
-        .progress {
-            background: #eee;
-            border-radius: 10px;
-            height: 10px;
-            margin: 15px 0;
-        }
-        
-        .progress-bar {
-            background: #4CAF50;
-            height: 100%;
-            border-radius: 10px;
-            width: 0%;
-            transition: width 1s;
-        }
-        
-        button {
-            padding: 12px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+
+        /* Premium Language Switch */
+        .lang-switch {
+            display: flex;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 20px;
+            padding: 4px;
+            gap: 4px;
             cursor: pointer;
-            font-weight: bold;
         }
-        
-        .btn-start { background: #4CAF50; color: white; }
-        .btn-stop { background: #f44336; color: white; }
-        .btn-test { background: #2196F3; color: white; }
-        
-        button:hover {
+
+        .lang-opt {
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .lang-opt.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .headphones-warning {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 20px;
             opacity: 0.8;
         }
-        
-        .hidden { display: none; }
-        
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 20px;
-            font-size: 14px;
+
+        .hidden-layout {
+            display: none !important;
+        }
+
+        /* Animation States */
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(2.2);
+            }
+        }
+
+        .breathing-active {
+            animation-name: breathe;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>🎵 Générateur 440Hz</h1>
-        
-        <div class="frequency">440 Hz (La3)</div>
-        
-        <div id="setup" class="controls">
-            <label>Durée (minutes):</label>
-            <input type="number" id="minutes" value="1" min="1" max="60">
-            
-            <label>Volume:</label>
-            <input type="range" id="volume" min="0" max="50" value="20">
-            <span id="volumeText">20%</span>
-        </div>
-        
-        <div id="timer" class="hidden">
-            <div class="time-display" id="timeLeft">00:00</div>
-            <div class="progress">
-                <div class="progress-bar" id="progressBar"></div>
+
+    <div class="glass-panel">
+        <div class="glass-header">
+            <div class="header-content">
+                <h1 id="appTitle" style="margin: 0; font-size: 1.6rem; text-align: left;">Neuro-Sync</h1>
+                <div id="appSubtitle" class="subtitle" style="margin: 5px 0 0 0; text-align: left; font-size: 0.85rem;">
+                    Binaural Beats & Respiration Consciente</div>
+            </div>
+
+            <div class="lang-switch" onclick="toggleLanguage()">
+                <div id="langFR" class="lang-opt active">FR</div>
+                <div id="langEN" class="lang-opt">EN</div>
             </div>
         </div>
-        
-        <div>
-            <button id="startBtn" class="btn-start">▶ Démarrer</button>
-            <button id="stopBtn" class="btn-stop hidden">⏹ Arrêter</button>
+
+        <!-- SETUP VIEW -->
+        <div id="setupView" class="view-setup">
+            <!-- Mode Selection -->
+            <div class="modes-grid">
+                <div class="mode-card active" onclick="selectMode('relax')" data-mode="relax">
+                    <span class="mode-title">🌿 Relaxation</span>
+                    <span class="mode-desc">Alpha/Thêta (8Hz)</span>
+                </div>
+                <div class="mode-card" onclick="selectMode('focus')" data-mode="focus">
+                    <span class="mode-title">⚡ Concentration</span>
+                    <span class="mode-desc">Bêta (15Hz)</span>
+                </div>
+                <div class="mode-card" onclick="selectMode('clarity')" data-mode="clarity">
+                    <span class="mode-title">💎 Clarté</span>
+                    <span class="mode-desc">Gamma (12Hz diff)</span>
+                </div>
+                <div class="mode-card" onclick="selectMode('sleep')" data-mode="sleep">
+                    <span class="mode-title">🌙 Sommeil</span>
+                    <span class="mode-desc">Delta (3.9Hz)</span>
+                </div>
+
+                <!-- Séparateur -->
+                <div class="section-title">✨ Fréquences Pures (Mono)</div>
+
+                <!-- Nouvelles fréquences pures -->
+                <div class="mode-card" onclick="selectMode('pure432')" data-mode="pure432">
+                    <span class="mode-title">🌍 Naturel</span>
+                    <span class="mode-desc">432 Hz Pur</span>
+                </div>
+                <div class="mode-card" onclick="selectMode('pure440')" data-mode="pure440">
+                    <span class="mode-title">🎵 Standard</span>
+                    <span class="mode-desc">440 Hz Pur</span>
+                </div>
+
+                <div id="modeInfo" class="mode-info-box"></div>
+            </div>
+
+            <!-- Controls (Setup only) -->
+            <div class="controls">
+                <div class="time-slider-container">
+                    <span>Durée</span>
+                    <input type="range" id="timeSlider" min="5" max="60" value="10" step="5">
+                    <span id="timeDisplay" style="width: 45px; text-align: right;">10m</span>
+                </div>
+            </div>
         </div>
-        
-        <div class="warning">
-            ⚠️ Utilisez un volume modéré pour protéger votre audition
+
+        <!-- SESSION VIEW (Immersive) -->
+        <div id="sessionView" class="view-session">
+            <div class="visualizer-container">
+                <div id="breathingCircle" class="breathing-circle"></div>
+                <div id="guideText" class="breathing-label">Inspirez...</div>
+            </div>
+            <div id="postureHint" class="posture-hint">🧘 Position : Allongé ou Assis</div>
+            <div id="sessionTimerDisplay"
+                style="font-size: 2rem; font-weight: bold; color: var(--text-dark); margin-bottom: 20px;">10:00</div>
+        </div>
+
+        <!-- Persistent Controls (Volume + Button) -->
+        <div style="margin-top: 10px; width: 100%; position: relative; z-index: 20;">
+            <div class="time-slider-container" style="margin-bottom: 15px;">
+                <span>Volume</span>
+                <input type="range" id="volumeSlider" min="0" max="100" value="30">
+            </div>
+
+            <button id="mainBtn" class="btn-main" onclick="toggleSession()" style="width: 100%;">
+                <span id="btnIcon">▶</span>
+                <span id="btnText">Commencer la session</span>
+            </button>
+        </div>
+
+        <div class="headphones-warning">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path
+                    d="M8 3a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a6 6 0 1 1 12 0v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1V8a5 5 0 0 0-5-5z" />
+            </svg>
+            Utilisez des écouteurs stéréo pour l'effet binaural
         </div>
     </div>
 
     <script>
-        // Variables globales
-        let audioContext = null;
-        let oscillator = null;
-        let gainNode = null;
-        let isPlaying = false;
-        let timer = null;
-        let totalSeconds = 0;
-        let remainingSeconds = 0;
+        // --- TRANSLATIONS ---
+        let currentLang = 'fr';
 
-        // Éléments HTML
-        const minutesInput = document.getElementById('minutes');
-        const volumeSlider = document.getElementById('volume');
-        const volumeText = document.getElementById('volumeText');
-        const startBtn = document.getElementById('startBtn');
-        const stopBtn = document.getElementById('stopBtn');
-        const testBtn = document.getElementById('testBtn');
-        const setupDiv = document.getElementById('setup');
-        const timerDiv = document.getElementById('timer');
-        const timeLeftSpan = document.getElementById('timeLeft');
-        const progressBar = document.getElementById('progressBar');
-
-        // Mettre à jour l'affichage du volume
-        volumeSlider.addEventListener('input', function() {
-            volumeText.textContent = this.value + '%';
-            if (gainNode) {
-                gainNode.gain.value = this.value / 100 * 0.5;
+        const TRANSLATIONS = {
+            fr: {
+                subtitle: "Binaural Beats & Respiration Consciente",
+                modes: {
+                    relax: { title: "🌿 Relaxation", desc: "Alpha/Thêta (8Hz)", text: "Cohérence & Relaxation", posture: "🧘 Position : Allongé ou Assis confortablement", info: "Favorise la détente profonde et la cohérence cardiaque. Idéal pour réduire le stress." },
+                    focus: { title: "⚡ Concentration", desc: "Bêta (15Hz)", text: "Focus Intense", posture: "🪑 Position : Préférable Assis (dos droit)", info: "Stimule la concentration et la clarté mentale. Aide à rester alerte et productif." },
+                    clarity: { title: "💎 Clarté", desc: "Gamma (12Hz diff)", text: "Clarté Mentale", posture: "🪑 Position : Préférable Assis (dos droit)", info: "Améliore la pensée créative et la résolution de problèmes. Pour une clarté d'esprit." },
+                    sleep: { title: "🌙 Sommeil", desc: "Delta (3.9Hz)", text: "Sommeil Profond", posture: "🛌 Position : Allongé (idéal pour s'endormir)", info: "Induit un état de relaxation profonde propice à l'endormissement et au sommeil réparateur." },
+                    pure432: { title: "🌍 Naturel", desc: "432 Hz Pur", text: "Harmonie 432Hz", posture: "� Position : Libre", info: "Ralentit le rythme cardiaque, réduit l'anxiété et favorise la détente émotionnelle. Sensation de clarté et de connexion à la nature." },
+                    pure440: { title: "🎵 Standard", desc: "440 Hz Pur", text: "Référence 440Hz", posture: "🧘 Position : Libre", info: "Perçu comme plus lumineux et stimulant pour la concentration et la pensée analytique. Vibration dynamique." }
+                },
+                sectionTitle: "✨ Fréquences Pures (Mono)",
+                volume: "Volume",
+                duration: "Durée",
+                start: "Commencer la session",
+                stop: "Arrêter la session",
+                inhale: "Inspirez...",
+                exhale: "Expirez...",
+                headphoneWarning: "Utilisez des écouteurs stéréo pour l'effet binaural"
+            },
+            en: {
+                subtitle: "Binaural Beats & Conscious Breathing",
+                modes: {
+                    relax: { title: "🌿 Relaxation", desc: "Alpha/Theta (8Hz)", text: "Coherence & Relaxation", posture: "🧘 Position: Lying down or Sitting comfortably", info: "Promotes deep relaxation and cardiac coherence. Ideal for reducing stress." },
+                    focus: { title: "⚡ Concentration", desc: "Beta (15Hz)", text: "Intense Focus", posture: "🪑 Position: Sitting preferred (straight back)", info: "Stimulates concentration and mental clarity. Helps stay alert and productive." },
+                    clarity: { title: "💎 Clarity", desc: "Gamma (12Hz diff)", text: "Mental Clarity", posture: "🪑 Position: Sitting preferred (straight back)", info: "Enhances creative thinking and problem solving. For peace of mind." },
+                    sleep: { title: "🌙 Sleep", desc: "Delta (3.9Hz)", text: "Deep Sleep", posture: "🛌 Position: Lying down (ideal for falling asleep)", info: "Induces deep relaxation conducive to falling asleep and restorative sleep." },
+                    pure432: { title: "🌍 Natural", desc: "432 Hz Pure", text: "Harmony 432Hz", posture: "🧘 Position: Free", info: "Slows heart rate, reduces anxiety, promotes emotional relaxation. Enhances clarity and nature connection." },
+                    pure440: { title: "🎵 Standard", desc: "440 Hz Pure", text: "Reference 440Hz", posture: "🧘 Position: Free", info: "Perceived as brighter and stimulating for concentration and analytical thinking." }
+                },
+                sectionTitle: "✨ Pure Frequencies (Mono)",
+                volume: "Volume",
+                duration: "Duration",
+                start: "Start Session",
+                stop: "Stop Session",
+                inhale: "Inhale...",
+                exhale: "Exhale...",
+                headphoneWarning: "Use stereo headphones for binaural effect"
             }
-        });
+        };
 
-        // Fonction pour créer le son
-        function createSound() {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            
-            oscillator = audioContext.createOscillator();
-            gainNode = audioContext.createGain();
-            
-            oscillator.frequency.value = 440; // 440 Hz
-            oscillator.type = 'sine';
-            gainNode.gain.value = volumeSlider.value / 100 * 0.5;
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.start();
-            isPlaying = true;
+        // Configuration des Modes (Updated to use keys only, text injected dynamically)
+        const MODES = {
+            relax: { freqL: 432, freqR: 440, pattern: [5, 0, 5, 0], duration: 15, colorL: '#4A90E2', colorR: '#63b3ed' },
+            focus: { freqL: 300, freqR: 315, pattern: [5, 0, 5, 0], duration: 20, colorL: '#F56565', colorR: '#FC8181' },
+            clarity: { freqL: 174, freqR: 186, pattern: [5, 0, 5, 0], duration: 15, colorL: '#9F7AEA', colorR: '#B794F4' },
+            sleep: { freqL: 136.1, freqR: 140, pattern: [5, 0, 5, 0], duration: 30, colorL: '#2C5282', colorR: '#4299E1' },
+            pure432: { freqL: 432, freqR: 432, pattern: [5, 0, 5, 0], duration: 10, colorL: '#38A169', colorR: '#48BB78' },
+            pure440: { freqL: 440, freqR: 440, pattern: [5, 0, 5, 0], duration: 10, colorL: '#D69E2E', colorR: '#ECC94B' }
+        };
+
+        // État Global
+        let currentMode = 'relax';
+        let isRunning = false;
+        let audioCtx, oscL, oscR, gainNode, intervalTimer;
+        let timeLeft = 900; // defaut 15 min
+
+        // Éléments DOM
+        const btnMain = document.getElementById('mainBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const circle = document.getElementById('breathingCircle');
+        const guideText = document.getElementById('guideText');
+        const postureHint = document.getElementById('postureHint');
+        const modeInfo = document.getElementById('modeInfo'); // New
+        const timeDisplay = document.getElementById('timeDisplay');
+        const timeSlider = document.getElementById('timeSlider');
+        const setupView = document.getElementById('setupView');
+        const sessionView = document.getElementById('sessionView');
+        const sessionTimerDisplay = document.getElementById('sessionTimerDisplay');
+
+        // Language Toggle Logic
+        function toggleLanguage() {
+            currentLang = currentLang === 'fr' ? 'en' : 'fr';
+
+            // Visual Toggle Update
+            document.getElementById('langFR').classList.toggle('active');
+            document.getElementById('langEN').classList.toggle('active');
+
+            updateInterfaceLanguage();
         }
 
-        // Fonction pour arrêter le son
-        function stopSound() {
-            if (oscillator) {
-                oscillator.stop();
-                oscillator = null;
-                gainNode = null;
-                isPlaying = false;
-            }
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-            
-            // Remettre l'interface normale
-            setupDiv.classList.remove('hidden');
-            timerDiv.classList.add('hidden');
-            startBtn.classList.remove('hidden');
-            stopBtn.classList.add('hidden');
-            testBtn.textContent = '🔊 Test';
+        function updateInterfaceLanguage() {
+            const t = TRANSLATIONS[currentLang];
+
+            // Subtitle
+            document.getElementById('appSubtitle').textContent = t.subtitle;
+
+            // Section Title (Pure Frequences)
+            document.querySelector('.section-title').textContent = t.sectionTitle;
+
+            // Labels
+            document.querySelectorAll('.time-slider-container span')[0].textContent = t.volume; // Volume label
+            document.querySelectorAll('.controls .time-slider-container span')[0].textContent = t.duration; // Duration label in Setup
+
+            // Warning
+            document.querySelector('.headphones-warning').innerHTML = `
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 3a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a6 6 0 1 1 12 0v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1V8a5 5 0 0 0-5-5z"/>
+                </svg> ${t.headphoneWarning}`;
+
+            // Mode Cards
+            const cards = document.querySelectorAll('.mode-card');
+            cards.forEach(card => {
+                const key = card.getAttribute('data-mode');
+                card.querySelector('.mode-title').textContent = t.modes[key].title;
+                card.querySelector('.mode-desc').textContent = t.modes[key].desc;
+            });
+
+            // Refresh current mode info/posture
+            selectMode(currentMode);
+
+            // Button Text (if static, but here it's toggled, so we update based on state)
+            updateButtonText();
         }
 
-        // Fonction pour formater le temps
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
-        }
-
-        // Bouton Démarrer
-        startBtn.addEventListener('click', function() {
-            totalSeconds = parseInt(minutesInput.value) * 60;
-            remainingSeconds = totalSeconds;
-            
-            createSound();
-            
-            // Changer l'interface
-            setupDiv.classList.add('hidden');
-            timerDiv.classList.remove('hidden');
-            startBtn.classList.add('hidden');
-            stopBtn.classList.remove('hidden');
-            
-            // Démarrer le décompte
-            timer = setInterval(function() {
-                remainingSeconds--;
-                timeLeftSpan.textContent = formatTime(remainingSeconds);
-                
-                // Mettre à jour la barre de progression
-                const progress = ((totalSeconds - remainingSeconds) / totalSeconds) * 100;
-                progressBar.style.width = progress + '%';
-                
-                if (remainingSeconds <= 0) {
-                    stopSound();
-                }
-            }, 1000);
-            
-            // Affichage initial
-            timeLeftSpan.textContent = formatTime(remainingSeconds);
-        });
-
-        // Bouton Arrêter
-        stopBtn.addEventListener('click', stopSound);
-
-        // Bouton Test
-        testBtn.addEventListener('click', function() {
-            if (!isPlaying || timer) { // Si pas en cours ou si c'est le timer
-                createSound();
-                testBtn.textContent = '⏸ Arrêter Test';
+        function updateButtonText() {
+            const t = TRANSLATIONS[currentLang];
+            if (isRunning) {
+                btnText.textContent = t.stop;
             } else {
-                stopSound();
+                btnText.textContent = t.start;
+            }
+        }
+
+        // Sélection du Mode
+        function selectMode(modeKey) {
+            if (isRunning && currentLang === 'fr') return; // Hack to allow re-selection for lang update if needed, but safer to block logic change
+
+            // Note: We allow re-selecting same mode just to update text
+
+            // UI Update
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            document.querySelector(`[data-mode="${modeKey}"]`).classList.add('active');
+
+            currentMode = modeKey;
+            const t = TRANSLATIONS[currentLang].modes[modeKey];
+            const config = MODES[modeKey];
+
+            // Update Visuals & Posture
+            circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
+            circle.style.boxShadow = `0 0 30px ${config.colorL}40`;
+            postureHint.textContent = t.posture;
+
+            // Update Info Box
+            if (t.info) {
+                modeInfo.textContent = t.info;
+                modeInfo.style.display = 'block';
+                modeInfo.style.borderColor = config.colorL;
+            } else {
+                modeInfo.style.display = 'none';
+            }
+
+            // Sync Slider only if not running (logic update)
+            if (!isRunning) {
+                timeSlider.value = config.duration;
+                timeLeft = config.duration * 60;
+                timeDisplay.textContent = config.duration + 'm';
+            }
+        }
+
+        function updateSessionTimerDisplay() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            const text = `${m}:${s.toString().padStart(2, '0')}`;
+            timeDisplay.textContent = m + 'm'; // Setup view keeps simple mins
+            sessionTimerDisplay.textContent = text; // Session view gets full MM:SS
+        }
+
+        // Mise à jour du timer (Input)
+        timeSlider.addEventListener('input', (e) => {
+            if (!isRunning) {
+                timeLeft = e.target.value * 60;
+                updateSessionTimerDisplay();
             }
         });
+
+        // Contrôle du Volume
+        const volumeSlider = document.getElementById('volumeSlider');
+        volumeSlider.addEventListener('input', (e) => {
+            if (gainNode) {
+                gainNode.gain.setTargetAtTime(e.target.value / 100 * 0.5, audioCtx.currentTime, 0.1);
+            }
+        });
+
+        // Moteur Audio Binaural
+        async function startAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            const config = MODES[currentMode];
+
+            // Master volume
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = volumeSlider.value / 100 * 0.5;
+            gainNode.connect(audioCtx.destination);
+
+            // Channel Left
+            const pannerL = audioCtx.createStereoPanner();
+            pannerL.pan.value = -1; // Full Left
+            pannerL.connect(gainNode);
+
+            oscL = audioCtx.createOscillator();
+            oscL.type = 'sine';
+            oscL.frequency.value = config.freqL;
+            oscL.connect(pannerL);
+
+            // Channel Right
+            const pannerR = audioCtx.createStereoPanner();
+            pannerR.pan.value = 1; // Full Right
+            pannerR.connect(gainNode);
+
+            oscR = audioCtx.createOscillator();
+            oscR.type = 'sine';
+            oscR.frequency.value = config.freqR;
+            oscR.connect(pannerR);
+
+            // Fade in
+            const now = audioCtx.currentTime;
+            gainNode.gain.setValueAtTime(0, now);
+            gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.5, now + 1);
+
+            oscL.start();
+            oscR.start();
+        }
+
+        function stopAudio() {
+            if (oscL && oscR) {
+                const now = audioCtx.currentTime;
+                gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
+
+                setTimeout(() => {
+                    oscL.stop();
+                    oscR.stop();
+                    oscL = null;
+                    oscR = null;
+                }, 500);
+            }
+        }
+
+        // Logique de Session
+        function toggleSession() {
+            if (!isRunning) {
+                // START
+                startAudio();
+
+                isRunning = true;
+
+                // Switch Views
+                setupView.classList.add('hidden-layout');
+                sessionView.classList.add('active');
+
+                btnMain.classList.add('active');
+                updateButtonText(); // Use helper
+                btnIcon.textContent = "⏹";
+
+                // Active le guide respiratoire
+                startBreathingLogic();
+
+                // Countdown
+                intervalTimer = setInterval(() => {
+                    timeLeft--;
+                    updateSessionTimerDisplay();
+
+                    if (timeLeft <= 0) {
+                        toggleSession(); // Auto stop
+                    }
+                }, 1000);
+
+            } else {
+                // STOP
+                stopAudio();
+
+                isRunning = false;
+
+                // Switch Views Back
+                setupView.classList.remove('hidden-layout');
+                sessionView.classList.remove('active');
+
+                btnMain.classList.remove('active');
+                updateButtonText(); // Use helper
+                btnIcon.textContent = "▶";
+
+                // Stop Breathing
+                stopBreathingLogic();
+
+                // Reset UI
+                clearInterval(intervalTimer);
+
+                // Reset Time Display
+                const currentConfig = MODES[currentMode];
+                timeLeft = currentConfig.duration * 60;
+                updateSessionTimerDisplay();
+                timeSlider.value = currentConfig.duration;
+            }
+        }
+
+        // --- Moteur de Respiration 4 Phases ---
+        let breathTimeout;
+
+        function startBreathingLogic() {
+            guideText.style.opacity = 1;
+            const pattern = MODES[currentMode].pattern; // ex: [4, 4, 4, 4]
+
+            // On enlève l'animation CSS automatique pour la gérer manuellement via JS si besoin
+            // OU on garde CSS pour l'expansion principale et on gère le texte.
+            // Pour être parfaitement synchrone avec 4 phases, il vaut mieux gérer l'animation ici via transition.
+            circle.classList.remove('breathing-active'); // On retire l'ancienne anim CSS simple
+            circle.style.transition = 'transform ease-in-out'; // Transition fluide
+
+            runBreathPhase(0, pattern);
+        }
+
+        function runBreathPhase(phaseIndex, pattern) {
+            if (!isRunning) return;
+
+            const duration = pattern[phaseIndex]; // durée en secondes
+            const steps = [TRANSLATIONS[currentLang].inhale, '', TRANSLATIONS[currentLang].exhale, '']; // Empty string for hold if not used
+
+            // Update Text
+            // Si durée est 0 (ex: pas de rétention), on saute l'affichage
+            if (duration > 0) {
+                guideText.textContent = steps[phaseIndex];
+
+                // Update Circle Visual
+                if (phaseIndex === 0) { // Inspire -> Gros
+                    circle.style.transitionDuration = `${duration}s`;
+                    circle.style.transform = 'scale(2.2)';
+                } else if (phaseIndex === 2) { // Expire -> Petit
+                    circle.style.transitionDuration = `${duration}s`;
+                    circle.style.transform = 'scale(1)';
+                } else {
+                    // Rétention -> Bouge pas
+                    // circle.style.transform reste tel quel
+                }
+            }
+
+            // Schedule next phase
+            // Si duration est 0, on passe tout de suite
+            let delay = duration * 1000;
+
+            breathTimeout = setTimeout(() => {
+                let nextPhase = (phaseIndex + 1) % 4;
+                runBreathPhase(nextPhase, pattern);
+            }, delay > 0 ? delay : 0);
+        }
+
+        function stopBreathingLogic() {
+            clearTimeout(breathTimeout);
+            guideText.style.opacity = 0;
+            guideText.textContent = "";
+            circle.style.transform = 'scale(1)';
+            circle.style.transitionDuration = '0.5s';
+        }
     </script>
 </body>
+
 </html>
