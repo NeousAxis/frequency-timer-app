@@ -27,8 +27,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            justify-content: flex-start;
+            overflow-y: auto;
+            padding: 20px 0 80px 0;
             transition: background 1s ease;
         }
 
@@ -352,6 +353,169 @@
         /* Utility */
         .hidden {
             display: none;
+        }
+
+        /* Footer Navigation */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            z-index: 100;
+        }
+
+        .footer-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            padding: 8px 16px;
+        }
+
+        .footer-btn:hover,
+        .footer-btn.active {
+            color: var(--primary);
+        }
+
+        .footer-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .modal-section {
+            margin-bottom: 25px;
+        }
+
+        .modal-section h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .modal-section p {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        /* Premium Cards */
+        .plan-card {
+            background: rgba(74, 144, 226, 0.05);
+            border: 2px solid rgba(74, 144, 226, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plan-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .plan-card.premium {
+            background: linear-gradient(135deg, rgba(159, 122, 234, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
+            border-color: #9F7AEA;
+        }
+
+        .plan-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .plan-price {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .plan-features {
+            font-size: 0.8rem;
+            color: var(--text-dark);
+        }
+
+        .plan-features li {
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -815,7 +979,160 @@
             circle.style.transform = 'scale(1)';
             circle.style.transitionDuration = '0.5s';
         }
+
+        // --- Modal Functions ---
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on overlay click
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
     </script>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <button class="footer-btn" onclick="openModal('infoModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 16v-4"></path>
+                <path d="M12 8h.01"></path>
+            </svg>
+            <span>Info</span>
+        </button>
+        <button class="footer-btn" onclick="openModal('premiumModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon
+                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                </polygon>
+            </svg>
+            <span>Premium</span>
+        </button>
+        <button class="footer-btn" onclick="openModal('settingsModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                </path>
+            </svg>
+            <span>Réglages</span>
+        </button>
+    </nav>
+
+    <!-- Info Modal -->
+    <div id="infoModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('infoModal')">✕</button>
+            <h2 class="modal-title">🧠 À Propos</h2>
+
+            <div class="modal-section">
+                <h3>🎧 Fréquences Binaurales</h3>
+                <p>Les fréquences binaurales sont créées lorsque deux tons légèrement différents sont joués dans chaque
+                    oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la différence entre les deux.
+                    Cette technique peut induire différents états mentaux selon la fréquence produite.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>🌊 Effets sur le Cerveau</h3>
+                <p><strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br>
+                    <strong>Thêta (4-8 Hz)</strong> : Méditation, créativité<br>
+                    <strong>Alpha (8-14 Hz)</strong> : Relaxation, calme<br>
+                    <strong>Bêta (14-30 Hz)</strong> : Concentration, alerte<br>
+                    <strong>Gamma (30+ Hz)</strong> : Cognition élevée, clarté
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h3>🌬️ Respiration Consciente</h3>
+                <p>La respiration consciente active le système nerveux parasympathique, réduisant le stress et
+                    l'anxiété. La cohérence cardiaque (5 secondes d'inspiration, 5 secondes d'expiration) synchronise le
+                    cœur et le cerveau pour un état optimal.</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>🔄 Cycles Respiratoires</h3>
+                <p><strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br>
+                    <strong>Respiration Carrée</strong> : 4s/4s/4s/4s - Calme et focus<br>
+                    <strong>4-7-8</strong> : Inspiration 4s, rétention 7s, expiration 8s - Endormissement
+                </p>
+            </div>
+
+            <div class="modal-section" style="font-size: 0.75rem; color: var(--text-light);">
+                <p>📚 Sources à venir...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Modal -->
+    <div id="premiumModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('premiumModal')">✕</button>
+            <h2 class="modal-title">⭐ Choisir votre Plan</h2>
+
+            <div class="plan-card">
+                <div class="plan-name">🆓 Free Brain</div>
+                <div class="plan-price">Gratuit</div>
+                <ul class="plan-features">
+                    <li>✓ 4 modes binauraux</li>
+                    <li>✓ 2 fréquences pures</li>
+                    <li>✓ Guide de respiration</li>
+                    <li>✓ Sessions jusqu'à 30 min</li>
+                </ul>
+            </div>
+
+            <div class="plan-card premium">
+                <div class="plan-name">🧠 Nu Brain</div>
+                <div class="plan-price">4.99€ / mois</div>
+                <ul class="plan-features">
+                    <li>✓ Tout Free Brain +</li>
+                    <li>✓ Sessions illimitées</li>
+                    <li>✓ Fréquences personnalisées</li>
+                    <li>✓ Patterns respiratoires avancés</li>
+                    <li>✓ Sans publicité</li>
+                    <li>✓ Mode hors-ligne</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+            <h2 class="modal-title">⚙️ Réglages</h2>
+
+            <div class="modal-section">
+                <h3>🔔 Notifications</h3>
+                <p>Bientôt disponible...</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>🎨 Thème</h3>
+                <p>Bientôt disponible...</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>📊 Statistiques</h3>
+                <p>Bientôt disponible...</p>
+            </div>
+
+            <div class="modal-section">
+                <h3>ℹ️ Version</h3>
+                <p>Nu Frequencies v1.0.0</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
