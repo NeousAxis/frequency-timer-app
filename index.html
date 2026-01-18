@@ -517,15 +517,6 @@
         .plan-features li {
             margin-bottom: 5px;
         }
-
-        /* Haptic Toggle */
-        #hapticToggle.active {
-            background: var(--primary) !important;
-        }
-
-        #hapticToggle.active>div {
-            left: 24px !important;
-        }
     </style>
 </head>
 
@@ -670,7 +661,6 @@
                 },
                 settingsModal: {
                     title: "⚙️ Réglages",
-                    haptic: { title: "📳 Vibrations Haptiques", text: "Guidage par vibrations pendant la respiration" },
                     notifications: { title: "🔔 Notifications", text: "Bientôt disponible..." },
                     theme: { title: "🎨 Thème", text: "Bientôt disponible..." },
                     stats: { title: "📊 Statistiques", text: "Bientôt disponible..." },
@@ -711,7 +701,6 @@
                 },
                 settingsModal: {
                     title: "⚙️ Settings",
-                    haptic: { title: "📳 Haptic Vibrations", text: "Vibration guidance during breathing" },
                     notifications: { title: "🔔 Notifications", text: "Coming soon..." },
                     theme: { title: "🎨 Theme", text: "Coming soon..." },
                     stats: { title: "📊 Statistics", text: "Coming soon..." },
@@ -829,8 +818,6 @@
 
             // Settings Modal
             document.getElementById('settingsModalTitle').textContent = t.settingsModal.title;
-            document.getElementById('settingsHapticTitle').textContent = t.settingsModal.haptic.title;
-            document.getElementById('settingsHapticText').textContent = t.settingsModal.haptic.text;
             document.getElementById('settingsNotifTitle').textContent = t.settingsModal.notifications.title;
             document.getElementById('settingsNotifText').textContent = t.settingsModal.notifications.text;
             document.getElementById('settingsThemeTitle').textContent = t.settingsModal.theme.title;
@@ -1023,46 +1010,6 @@
 
         // --- Moteur de Respiration 4 Phases ---
         let breathTimeout;
-        let hapticInterval;
-        let hapticEnabled = false; // Toggle via Settings
-
-        // Haptic feedback function
-        function vibrateRhythm(duration) {
-            if (!hapticEnabled || !navigator.vibrate) return null;
-
-            // Calculate interval: 5 beats per phase
-            const beats = 5;
-            const interval = (duration * 1000) / beats;
-
-            // Initial vibration
-            navigator.vibrate(50);
-
-            // Rhythmic vibrations
-            let count = 1;
-            return setInterval(() => {
-                if (count < beats) {
-                    navigator.vibrate(50);
-                    count++;
-                }
-            }, interval);
-        }
-
-        function vibrateTransition() {
-            if (!hapticEnabled || !navigator.vibrate) return;
-            // Longer vibration for transition
-            navigator.vibrate([100, 50, 100]);
-        }
-
-        function toggleHaptic() {
-            hapticEnabled = !hapticEnabled;
-            const toggle = document.getElementById('hapticToggle');
-            toggle.classList.toggle('active', hapticEnabled);
-
-            // Test vibration when enabled
-            if (hapticEnabled && navigator.vibrate) {
-                navigator.vibrate(100);
-            }
-        }
 
         function startBreathingLogic() {
             guideText.style.opacity = 1;
@@ -1092,23 +1039,13 @@
                 if (phaseIndex === 0) { // Inspire -> Gros
                     circle.style.transitionDuration = `${duration}s`;
                     circle.style.transform = 'scale(2.2)';
-                    // Start rhythmic haptic
-                    if (hapticInterval) clearInterval(hapticInterval);
-                    hapticInterval = vibrateRhythm(duration);
                 } else if (phaseIndex === 2) { // Expire -> Petit
                     circle.style.transitionDuration = `${duration}s`;
                     circle.style.transform = 'scale(1)';
-                    // Start rhythmic haptic
-                    if (hapticInterval) clearInterval(hapticInterval);
-                    hapticInterval = vibrateRhythm(duration);
                 } else {
-                    // Rétention -> Bouge pas, transition vibration
-                    if (hapticInterval) clearInterval(hapticInterval);
-                    vibrateTransition();
+                    // Rétention -> Bouge pas
+                    // circle.style.transform reste tel quel
                 }
-            } else {
-                // Phase with duration 0 = transition point
-                vibrateTransition();
             }
 
             // Schedule next phase
@@ -1123,7 +1060,6 @@
 
         function stopBreathingLogic() {
             clearTimeout(breathTimeout);
-            if (hapticInterval) clearInterval(hapticInterval);
             guideText.style.opacity = 0;
             guideText.textContent = "";
             circle.style.transform = 'scale(1)';
@@ -1266,20 +1202,6 @@
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
             <h2 id="settingsModalTitle" class="modal-title">⚙️ Réglages</h2>
-
-            <div class="modal-section" style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h3 id="settingsHapticTitle" style="margin: 0;">📳 Vibrations Haptiques</h3>
-                    <p id="settingsHapticText" style="margin: 5px 0 0 0; font-size: 0.8rem;">Guidage par vibrations
-                        pendant la respiration</p>
-                </div>
-                <div id="hapticToggle" onclick="toggleHaptic()"
-                    style="width: 50px; height: 28px; background: rgba(0,0,0,0.1); border-radius: 14px; cursor: pointer; position: relative; transition: all 0.3s;">
-                    <div
-                        style="width: 24px; height: 24px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    </div>
-                </div>
-            </div>
 
             <div class="modal-section">
                 <h3 id="settingsNotifTitle">🔔 Notifications</h3>
