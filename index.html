@@ -652,7 +652,7 @@
                     effects: { title: "🌊 Effets sur le Cerveau", text: "<strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br><strong>Thêta (4-8 Hz)</strong> : Méditation, créativité<br><strong>Alpha (8-14 Hz)</strong> : Relaxation, calme<br><strong>Bêta (14-30 Hz)</strong> : Concentration, alerte<br><strong>Gamma (30+ Hz)</strong> : Cognition élevée, clarté" },
                     breathing: { title: "🌬️ Respiration Consciente", text: "La respiration consciente est issue des exercices respiratoires très anciens provenant du <strong>Pranayama</strong>, une discipline millénaire du Yoga. La cohérence cardiaque a vulgarisé ces techniques ancestrales pour les rendre accessibles au plus grand nombre. Elle active le système nerveux parasympathique, réduisant le stress et l'anxiété. Le rythme 5s/5s synchronise le cœur et le cerveau pour un état optimal." },
                     cycles: { title: "🔄 Cycles Respiratoires", text: "<strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br><strong>Respiration Carrée</strong> : 4s/4s/4s/4s - Calme et focus<br><strong>4-7-8</strong> : Inspiration 4s, rétention 7s, expiration 8s - Endormissement" },
-                    sources: "📚 Sources à venir..."
+                    sources: "📚 Sources :<br><a href='https://pubmed.ncbi.nlm.nih.gov/31031095/' target='_blank'>432 Hz vs 440 Hz - PubMed Study</a><br><a href='https://www.c2.care/en/cardiac-coherence/' target='_blank'>Cardiac Coherence - C2.care</a>"
                 },
                 premiumModal: {
                     title: "⭐ Choisir votre Plan",
@@ -692,7 +692,7 @@
                     effects: { title: "🌊 Effects on the Brain", text: "<strong>Delta (0.5-4 Hz)</strong>: Deep sleep, regeneration<br><strong>Theta (4-8 Hz)</strong>: Meditation, creativity<br><strong>Alpha (8-14 Hz)</strong>: Relaxation, calm<br><strong>Beta (14-30 Hz)</strong>: Concentration, alertness<br><strong>Gamma (30+ Hz)</strong>: High cognition, clarity" },
                     breathing: { title: "🌬️ Conscious Breathing", text: "Conscious breathing originates from ancient breathing exercises from <strong>Pranayama</strong>, a thousand-year-old Yoga discipline. Cardiac coherence has popularized these ancestral techniques to make them accessible to everyone. It activates the parasympathetic nervous system, reducing stress and anxiety. The 5s/5s rhythm synchronizes the heart and brain for an optimal state." },
                     cycles: { title: "🔄 Breathing Cycles", text: "<strong>Cardiac Coherence</strong>: 5s/5s - Nervous system balance<br><strong>Box Breathing</strong>: 4s/4s/4s/4s - Calm and focus<br><strong>4-7-8</strong>: Inhale 4s, hold 7s, exhale 8s - Fall asleep" },
-                    sources: "📚 Sources coming soon..."
+                    sources: "📚 Sources:<br><a href='https://pubmed.ncbi.nlm.nih.gov/31031095/' target='_blank'>432 Hz vs 440 Hz - PubMed Study</a><br><a href='https://www.c2.care/en/cardiac-coherence/' target='_blank'>Cardiac Coherence - C2.care</a>"
                 },
                 premiumModal: {
                     title: "⭐ Choose Your Plan",
@@ -805,7 +805,7 @@
             document.getElementById('infoBreathingText').innerHTML = t.infoModal.breathing.text;
             document.getElementById('infoCyclesTitle').textContent = t.infoModal.cycles.title;
             document.getElementById('infoCyclesText').innerHTML = t.infoModal.cycles.text;
-            document.getElementById('infoSources').textContent = t.infoModal.sources;
+            document.getElementById('infoSources').innerHTML = t.infoModal.sources;
 
             // Premium Modal
             document.getElementById('premiumModalTitle').textContent = t.premiumModal.title;
@@ -1157,7 +1157,10 @@
             </div>
 
             <div class="modal-section" style="font-size: 0.75rem; color: var(--text-light);">
-                <p id="infoSources">📚 Sources à venir...</p>
+                <p id="infoSources">📚 Sources :<br><a href="https://pubmed.ncbi.nlm.nih.gov/31031095/" target="_blank"
+                        style="color: var(--primary);">432 Hz vs 440 Hz - PubMed Study</a><br><a
+                        href="https://www.c2.care/en/cardiac-coherence/" target="_blank"
+                        style="color: var(--primary);">Cardiac Coherence - C2.care</a></p>
             </div>
         </div>
     </div>
