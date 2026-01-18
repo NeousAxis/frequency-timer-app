@@ -1,6 +1,6 @@
-# Métamorphosys
+# Nu Frequencies
 
-Application de respiration consciente et de fréquences binaurales (Binaural Beats).
+Application de respiration consciente et de fréquences binaurales.
 
 ## Fonctionnalités
 - Modes binauraux (Relaxation, Focus, Sommeil, Clarté)
