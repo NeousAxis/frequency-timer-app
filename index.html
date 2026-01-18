@@ -644,7 +644,28 @@
                 stop: "Arrêter la session",
                 inhale: "Inspirez...",
                 exhale: "Expirez...",
-                headphoneWarning: "Utilisez des écouteurs stéréo pour l'effet binaural"
+                headphoneWarning: "Utilisez des écouteurs stéréo pour l'effet binaural",
+                footer: { info: "Info", premium: "Premium", settings: "Réglages" },
+                infoModal: {
+                    title: "🧠 À Propos",
+                    binaural: { title: "🎧 Fréquences Binaurales", text: "Les fréquences binaurales sont créées lorsque deux tons légèrement différents sont joués dans chaque oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la différence entre les deux. Cette technique peut induire différents états mentaux selon la fréquence produite." },
+                    effects: { title: "🌊 Effets sur le Cerveau", text: "<strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br><strong>Thêta (4-8 Hz)</strong> : Méditation, créativité<br><strong>Alpha (8-14 Hz)</strong> : Relaxation, calme<br><strong>Bêta (14-30 Hz)</strong> : Concentration, alerte<br><strong>Gamma (30+ Hz)</strong> : Cognition élevée, clarté" },
+                    breathing: { title: "🌬️ Respiration Consciente", text: "La respiration consciente active le système nerveux parasympathique, réduisant le stress et l'anxiété. La cohérence cardiaque (5 secondes d'inspiration, 5 secondes d'expiration) synchronise le cœur et le cerveau pour un état optimal." },
+                    cycles: { title: "🔄 Cycles Respiratoires", text: "<strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br><strong>Respiration Carrée</strong> : 4s/4s/4s/4s - Calme et focus<br><strong>4-7-8</strong> : Inspiration 4s, rétention 7s, expiration 8s - Endormissement" },
+                    sources: "📚 Sources à venir..."
+                },
+                premiumModal: {
+                    title: "⭐ Choisir votre Plan",
+                    free: { name: "🆓 Free Brain", price: "Gratuit", features: ["4 modes binauraux", "2 fréquences pures", "Guide de respiration", "Sessions jusqu'à 30 min"] },
+                    premium: { name: "🧠 Nu Brain", price: "4.99€ / mois", features: ["Tout Free Brain +", "Sessions illimitées", "Fréquences personnalisées", "Patterns respiratoires avancés", "Sans publicité", "Mode hors-ligne"] }
+                },
+                settingsModal: {
+                    title: "⚙️ Réglages",
+                    notifications: { title: "🔔 Notifications", text: "Bientôt disponible..." },
+                    theme: { title: "🎨 Thème", text: "Bientôt disponible..." },
+                    stats: { title: "📊 Statistiques", text: "Bientôt disponible..." },
+                    version: { title: "ℹ️ Version", text: "Nu Frequencies v1.0.0" }
+                }
             },
             en: {
                 subtitle: "Binaural Frequencies & Conscious Breathing",
@@ -663,7 +684,28 @@
                 stop: "Stop Session",
                 inhale: "Inhale...",
                 exhale: "Exhale...",
-                headphoneWarning: "Use stereo headphones for binaural effect"
+                headphoneWarning: "Use stereo headphones for binaural effect",
+                footer: { info: "Info", premium: "Premium", settings: "Settings" },
+                infoModal: {
+                    title: "🧠 About",
+                    binaural: { title: "🎧 Binaural Frequencies", text: "Binaural frequencies are created when two slightly different tones are played in each ear. Your brain perceives a third frequency equal to the difference between the two. This technique can induce different mental states depending on the frequency produced." },
+                    effects: { title: "🌊 Effects on the Brain", text: "<strong>Delta (0.5-4 Hz)</strong>: Deep sleep, regeneration<br><strong>Theta (4-8 Hz)</strong>: Meditation, creativity<br><strong>Alpha (8-14 Hz)</strong>: Relaxation, calm<br><strong>Beta (14-30 Hz)</strong>: Concentration, alertness<br><strong>Gamma (30+ Hz)</strong>: High cognition, clarity" },
+                    breathing: { title: "🌬️ Conscious Breathing", text: "Conscious breathing activates the parasympathetic nervous system, reducing stress and anxiety. Cardiac coherence (5 seconds inhale, 5 seconds exhale) synchronizes the heart and brain for an optimal state." },
+                    cycles: { title: "🔄 Breathing Cycles", text: "<strong>Cardiac Coherence</strong>: 5s/5s - Nervous system balance<br><strong>Box Breathing</strong>: 4s/4s/4s/4s - Calm and focus<br><strong>4-7-8</strong>: Inhale 4s, hold 7s, exhale 8s - Fall asleep" },
+                    sources: "📚 Sources coming soon..."
+                },
+                premiumModal: {
+                    title: "⭐ Choose Your Plan",
+                    free: { name: "🆓 Free Brain", price: "Free", features: ["4 binaural modes", "2 pure frequencies", "Breathing guide", "Sessions up to 30 min"] },
+                    premium: { name: "🧠 Nu Brain", price: "$4.99 / month", features: ["Everything in Free Brain +", "Unlimited sessions", "Custom frequencies", "Advanced breathing patterns", "Ad-free", "Offline mode"] }
+                },
+                settingsModal: {
+                    title: "⚙️ Settings",
+                    notifications: { title: "🔔 Notifications", text: "Coming soon..." },
+                    theme: { title: "🎨 Theme", text: "Coming soon..." },
+                    stats: { title: "📊 Statistics", text: "Coming soon..." },
+                    version: { title: "ℹ️ Version", text: "Nu Frequencies v1.0.0" }
+                }
             }
         };
 
@@ -740,6 +782,50 @@
 
             // Button Text (if static, but here it's toggled, so we update based on state)
             updateButtonText();
+
+            // Update Modals and Footer
+            updateModalsLanguage();
+        }
+
+        function updateModalsLanguage() {
+            const t = TRANSLATIONS[currentLang];
+
+            // Footer labels
+            document.getElementById('footerInfoLabel').textContent = t.footer.info;
+            document.getElementById('footerPremiumLabel').textContent = t.footer.premium;
+            document.getElementById('footerSettingsLabel').textContent = t.footer.settings;
+
+            // Info Modal
+            document.getElementById('infoModalTitle').textContent = t.infoModal.title;
+            document.getElementById('infoBinauralTitle').textContent = t.infoModal.binaural.title;
+            document.getElementById('infoBinauralText').textContent = t.infoModal.binaural.text;
+            document.getElementById('infoEffectsTitle').textContent = t.infoModal.effects.title;
+            document.getElementById('infoEffectsText').innerHTML = t.infoModal.effects.text;
+            document.getElementById('infoBreathingTitle').textContent = t.infoModal.breathing.title;
+            document.getElementById('infoBreathingText').textContent = t.infoModal.breathing.text;
+            document.getElementById('infoCyclesTitle').textContent = t.infoModal.cycles.title;
+            document.getElementById('infoCyclesText').innerHTML = t.infoModal.cycles.text;
+            document.getElementById('infoSources').textContent = t.infoModal.sources;
+
+            // Premium Modal
+            document.getElementById('premiumModalTitle').textContent = t.premiumModal.title;
+            document.getElementById('freePlanName').textContent = t.premiumModal.free.name;
+            document.getElementById('freePlanPrice').textContent = t.premiumModal.free.price;
+            document.getElementById('freePlanFeatures').innerHTML = t.premiumModal.free.features.map(f => `<li>✓ ${f}</li>`).join('');
+            document.getElementById('premiumPlanName').textContent = t.premiumModal.premium.name;
+            document.getElementById('premiumPlanPrice').textContent = t.premiumModal.premium.price;
+            document.getElementById('premiumPlanFeatures').innerHTML = t.premiumModal.premium.features.map(f => `<li>✓ ${f}</li>`).join('');
+
+            // Settings Modal
+            document.getElementById('settingsModalTitle').textContent = t.settingsModal.title;
+            document.getElementById('settingsNotifTitle').textContent = t.settingsModal.notifications.title;
+            document.getElementById('settingsNotifText').textContent = t.settingsModal.notifications.text;
+            document.getElementById('settingsThemeTitle').textContent = t.settingsModal.theme.title;
+            document.getElementById('settingsThemeText').textContent = t.settingsModal.theme.text;
+            document.getElementById('settingsStatsTitle').textContent = t.settingsModal.stats.title;
+            document.getElementById('settingsStatsText').textContent = t.settingsModal.stats.text;
+            document.getElementById('settingsVersionTitle').textContent = t.settingsModal.version.title;
+            document.getElementById('settingsVersionText').textContent = t.settingsModal.version.text;
         }
 
         function updateButtonText() {
@@ -1008,7 +1094,7 @@
                 <path d="M12 16v-4"></path>
                 <path d="M12 8h.01"></path>
             </svg>
-            <span>Info</span>
+            <span id="footerInfoLabel">Info</span>
         </button>
         <button class="footer-btn" onclick="openModal('premiumModal')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1016,7 +1102,7 @@
                     points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
                 </polygon>
             </svg>
-            <span>Premium</span>
+            <span id="footerPremiumLabel">Premium</span>
         </button>
         <button class="footer-btn" onclick="openModal('settingsModal')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1025,7 +1111,7 @@
                     d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                 </path>
             </svg>
-            <span>Réglages</span>
+            <span id="footerSettingsLabel">Réglages</span>
         </button>
     </nav>
 
@@ -1033,18 +1119,19 @@
     <div id="infoModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('infoModal')">✕</button>
-            <h2 class="modal-title">🧠 À Propos</h2>
+            <h2 id="infoModalTitle" class="modal-title">🧠 À Propos</h2>
 
             <div class="modal-section">
-                <h3>🎧 Fréquences Binaurales</h3>
-                <p>Les fréquences binaurales sont créées lorsque deux tons légèrement différents sont joués dans chaque
-                    oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la différence entre les deux.
-                    Cette technique peut induire différents états mentaux selon la fréquence produite.</p>
+                <h3 id="infoBinauralTitle">🎧 Fréquences Binaurales</h3>
+                <p id="infoBinauralText">Les fréquences binaurales sont créées lorsque deux tons légèrement différents
+                    sont joués dans chaque oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la
+                    différence entre les deux. Cette technique peut induire différents états mentaux selon la fréquence
+                    produite.</p>
             </div>
 
             <div class="modal-section">
-                <h3>🌊 Effets sur le Cerveau</h3>
-                <p><strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br>
+                <h3 id="infoEffectsTitle">🌊 Effets sur le Cerveau</h3>
+                <p id="infoEffectsText"><strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br>
                     <strong>Thêta (4-8 Hz)</strong> : Méditation, créativité<br>
                     <strong>Alpha (8-14 Hz)</strong> : Relaxation, calme<br>
                     <strong>Bêta (14-30 Hz)</strong> : Concentration, alerte<br>
@@ -1053,22 +1140,22 @@
             </div>
 
             <div class="modal-section">
-                <h3>🌬️ Respiration Consciente</h3>
-                <p>La respiration consciente active le système nerveux parasympathique, réduisant le stress et
-                    l'anxiété. La cohérence cardiaque (5 secondes d'inspiration, 5 secondes d'expiration) synchronise le
-                    cœur et le cerveau pour un état optimal.</p>
+                <h3 id="infoBreathingTitle">🌬️ Respiration Consciente</h3>
+                <p id="infoBreathingText">La respiration consciente active le système nerveux parasympathique, réduisant
+                    le stress et l'anxiété. La cohérence cardiaque (5 secondes d'inspiration, 5 secondes d'expiration)
+                    synchronise le cœur et le cerveau pour un état optimal.</p>
             </div>
 
             <div class="modal-section">
-                <h3>🔄 Cycles Respiratoires</h3>
-                <p><strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br>
+                <h3 id="infoCyclesTitle">🔄 Cycles Respiratoires</h3>
+                <p id="infoCyclesText"><strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br>
                     <strong>Respiration Carrée</strong> : 4s/4s/4s/4s - Calme et focus<br>
                     <strong>4-7-8</strong> : Inspiration 4s, rétention 7s, expiration 8s - Endormissement
                 </p>
             </div>
 
             <div class="modal-section" style="font-size: 0.75rem; color: var(--text-light);">
-                <p>📚 Sources à venir...</p>
+                <p id="infoSources">📚 Sources à venir...</p>
             </div>
         </div>
     </div>
@@ -1077,12 +1164,12 @@
     <div id="premiumModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('premiumModal')">✕</button>
-            <h2 class="modal-title">⭐ Choisir votre Plan</h2>
+            <h2 id="premiumModalTitle" class="modal-title">⭐ Choisir votre Plan</h2>
 
             <div class="plan-card">
-                <div class="plan-name">🆓 Free Brain</div>
-                <div class="plan-price">Gratuit</div>
-                <ul class="plan-features">
+                <div id="freePlanName" class="plan-name">🆓 Free Brain</div>
+                <div id="freePlanPrice" class="plan-price">Gratuit</div>
+                <ul id="freePlanFeatures" class="plan-features">
                     <li>✓ 4 modes binauraux</li>
                     <li>✓ 2 fréquences pures</li>
                     <li>✓ Guide de respiration</li>
@@ -1091,9 +1178,9 @@
             </div>
 
             <div class="plan-card premium">
-                <div class="plan-name">🧠 Nu Brain</div>
-                <div class="plan-price">4.99€ / mois</div>
-                <ul class="plan-features">
+                <div id="premiumPlanName" class="plan-name">🧠 Nu Brain</div>
+                <div id="premiumPlanPrice" class="plan-price">4.99€ / mois</div>
+                <ul id="premiumPlanFeatures" class="plan-features">
                     <li>✓ Tout Free Brain +</li>
                     <li>✓ Sessions illimitées</li>
                     <li>✓ Fréquences personnalisées</li>
@@ -1109,26 +1196,26 @@
     <div id="settingsModal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
-            <h2 class="modal-title">⚙️ Réglages</h2>
+            <h2 id="settingsModalTitle" class="modal-title">⚙️ Réglages</h2>
 
             <div class="modal-section">
-                <h3>🔔 Notifications</h3>
-                <p>Bientôt disponible...</p>
+                <h3 id="settingsNotifTitle">🔔 Notifications</h3>
+                <p id="settingsNotifText">Bientôt disponible...</p>
             </div>
 
             <div class="modal-section">
-                <h3>🎨 Thème</h3>
-                <p>Bientôt disponible...</p>
+                <h3 id="settingsThemeTitle">🎨 Thème</h3>
+                <p id="settingsThemeText">Bientôt disponible...</p>
             </div>
 
             <div class="modal-section">
-                <h3>📊 Statistiques</h3>
-                <p>Bientôt disponible...</p>
+                <h3 id="settingsStatsTitle">📊 Statistiques</h3>
+                <p id="settingsStatsText">Bientôt disponible...</p>
             </div>
 
             <div class="modal-section">
-                <h3>ℹ️ Version</h3>
-                <p>Nu Frequencies v1.0.0</p>
+                <h3 id="settingsVersionTitle">ℹ️ Version</h3>
+                <p id="settingsVersionText">Nu Frequencies v1.0.0</p>
             </div>
         </div>
     </div>
