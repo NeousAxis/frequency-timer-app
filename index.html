@@ -1578,11 +1578,6 @@
                 <button id="btnSubscribe" onclick="goToCheckout()"
                     style="width:100%; margin-top:15px; background:var(--primary); color:white; border:none; padding:12px; border-radius:10px; font-weight:700; cursor:pointer;">S'abonner
                     maintenant</button>
-
-                <button onclick="localStorage.setItem('nu_brain_plan', 'premium'); window.location.reload();"
-                    style="font-size: 0.8rem; color: var(--text-light); background: none; border: none; text-decoration: underline; cursor: pointer; margin-top: 10px; width: 100%;">
-                    J'ai déjà payé / Restaurer
-                </button>
             </div>
         </div>
     </div>
@@ -1610,10 +1605,11 @@
                 <span id="valUsage" class="settings-value">0 min</span>
             </div>
 
-            <!-- Restore Link for cases where redirect fails -->
-            <button onclick="localStorage.setItem('nu_brain_plan', 'premium'); window.location.reload();"
-                style="font-size: 0.85rem; color: var(--primary); background: none; border: none; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; text-decoration: none;">
-                ↺ J'ai déjà payé / Restaurer l'abonnement
+            <!-- Admin Restore (Password Protected) -->
+            <button
+                onclick="if(prompt('Admin Password:') === 'admin') { localStorage.setItem('nu_brain_plan', 'premium'); window.location.reload(); }"
+                style="font-size: 0.8rem; color: var(--text-light); background: none; border: none; text-decoration: underline; cursor: pointer; margin-top: 20px; width: 100%; opacity: 0.3;">
+                Admin / Debug
             </button>
 
             <button id="btnCancelSub" class="btn-outline-danger">Annuler l'abonnement</button>
