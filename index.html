@@ -912,15 +912,51 @@
         let timeLeft = 300; // default 5 min for Free tier
         let isAnnual = false; // Move to top scope to avoid TDZ issues
 
-        // Check for Stripe return
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('success') === 'true' || urlParams.get('payment_status') === 'success') {
-            userPlan = 'premium';
-            localStorage.setItem('nu_brain_plan', 'premium');
-            // Clean URL slightly to avoid re-triggering (optional but good UX)
-            window.history.replaceState({}, document.title, window.location.pathname);
-            setTimeout(() => alert("Bienvenue dans NU BRAiN ! Votre abonnement est actif."), 500);
+        // Check for Stripe return or saved state
+        function checkSubscriptionStatus() {
+            // Priority 1: Check URL Param (Return from Stripe)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true' || urlParams.get('payment_status') === 'success') {
+                userPlan = 'premium';
+                localStorage.setItem('nu_brain_plan', 'premium');
+                window.history.replaceState({}, document.title, window.location.pathname);
+                alert("Bienvenue dans NU BRAiN ! Votre abonnement est actif.");
+                return true;
+            }
+
+            // Priority 2: Check LocalStorage (Persisted state)
+            const savedPlan = localStorage.getItem('nu_brain_plan');
+            if (savedPlan === 'premium') {
+                userPlan = 'premium';
+                return true;
+            }
+
+            return false;
         }
+
+        checkSubscriptionStatus();
+
+        // AUTO-SYNC: Update state if changed in another tab or upon returning to tab
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'nu_brain_plan' && e.newValue === 'premium') {
+                userPlan = 'premium';
+                updateInterfaceLanguage();
+                selectMode(currentMode); // Unlock slider
+            }
+        });
+
+        window.addEventListener('focus', () => {
+            // Re-check storage when user comes back to this tab (e.g. from Stripe)
+            if (localStorage.getItem('nu_brain_plan') === 'premium' && userPlan !== 'premium') {
+                userPlan = 'premium';
+                updateInterfaceLanguage();
+                selectMode(currentMode);
+                // Force modal refresh if open
+                if (document.getElementById('premiumModal').style.display === 'flex') {
+                    updateModalsLanguage();
+                }
+            }
+        });
 
         // Éléments DOM
         const btnMain = document.getElementById('mainBtn');
@@ -1455,16 +1491,28 @@
         // --- INITIALIZATION ---
         // Run immediately (Script is at bottom of body, so DOM is ready)
 
-        // Re-check premium URL param
-        const urlParamsRefresh = new URLSearchParams(window.location.search);
-        if (urlParamsRefresh.get('success') === 'true' || urlParamsRefresh.get('payment_status') === 'success') {
-            userPlan = 'premium';
-            localStorage.setItem('nu_brain_plan', 'premium');
-            window.history.replaceState({}, document.title, window.location.pathname);
+        function checkSubscriptionStatus() {
+            // Re-check premium URL param
+            const urlParamsRefresh = new URLSearchParams(window.location.search);
+            if (urlParamsRefresh.get('success') === 'true' || urlParamsRefresh.get('payment_status') === 'success') {
+                userPlan = 'premium';
+                localStorage.setItem('nu_brain_plan', 'premium');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Check LocalStorage
+            userPlan = localStorage.getItem('nu_brain_plan') || 'free';
+
+            // Update UI elements that depend on userPlan
+            updateInterfaceLanguage(); // This function already updates plan-dependent UI
         }
 
-        // Check LocalStorage
-        userPlan = localStorage.getItem('nu_brain_plan') || 'free';
+        // Perform logic check on load
+        checkSubscriptionStatus();
+
+        // Add listeners for 'storage' and 'focus' to auto-update the UI when the user returns to the tab after payment.
+        window.addEventListener('storage', checkSubscriptionStatus);
+        window.addEventListener('focus', checkSubscriptionStatus);
 
         // Init Interface
         updateInterfaceLanguage();
@@ -1629,26 +1677,7 @@
                 <span id="valUsage" class="settings-value">0 min</span>
             </div>
 
-            <!-- Dev Mode Only (Hidden in Production) -->
-            <div id="devTools" style="display: none; border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 10px;">
-                <p style="font-size: 0.7rem; color: #aaa; margin-bottom: 5px;">Développeur (Localhost Uniquement)</p>
-                <button onclick="localStorage.setItem('nu_brain_plan', 'premium'); window.location.reload();"
-                    style="font-size: 0.8rem; color: var(--primary); background: none; border: none; text-decoration: underline; cursor: pointer;">
-                    [DEV] Simuler Success Stripe
-                </button>
-                <button onclick="localStorage.removeItem('nu_brain_plan'); window.location.reload();"
-                    style="font-size: 0.8rem; color: var(--danger); background: none; border: none; text-decoration: underline; cursor: pointer; margin-left: 10px;">
-                    [DEV] Reset Free
-                </button>
-            </div>
-
-            <script>
-                // Show Dev Tools on Localhost OR if URL contains ?debug=1
-                const urlParamsDebug = new URLSearchParams(window.location.search);
-                if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || urlParamsDebug.has('debug')) {
-                    document.getElementById('devTools').style.display = 'block';
-                }
-            </script>
+            <!-- No debug buttons for production -->
 
             <button id="btnCancelSub" class="btn-outline-danger">Annuler l'abonnement</button>
             <div id="noteCancelSub" class="settings-note">Arrête le renouvellement. Le compte reste Pro jusqu'à la fin
