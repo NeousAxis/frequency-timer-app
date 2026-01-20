@@ -1019,7 +1019,30 @@
             updatePriceDisplay();
 
             document.getElementById('premiumPlanFeatures').innerHTML = t.premiumModal.premium.features.map(f => `<li>✓ ${f}</li>`).join('');
-            document.getElementById('btnSubscribe').textContent = t.premiumModal.premium.btnSubscribe;
+
+            // Logic for Premium User UI in Modal
+            const btnSubscribe = document.getElementById('btnSubscribe');
+            const billingContainer = document.querySelector('.billing-toggle-container');
+            const freePlanCard = document.querySelector('.plan-card:not(.premium)');
+
+            if (userPlan === 'premium') {
+                btnSubscribe.textContent = "✓ Vous êtes déjà membre Premium";
+                btnSubscribe.style.background = "#48BB78"; // Success Green
+                btnSubscribe.style.cursor = "default";
+                btnSubscribe.onclick = null; // Disable click
+
+                // Optional: Hide billing toggle and free plan to clean up view
+                if (billingContainer) billingContainer.style.display = 'none';
+                if (freePlanCard) freePlanCard.style.display = 'none';
+            } else {
+                btnSubscribe.textContent = t.premiumModal.premium.btnSubscribe;
+                btnSubscribe.onclick = goToCheckout;
+                btnSubscribe.style.background = "var(--primary)";
+                btnSubscribe.style.cursor = "pointer";
+
+                if (billingContainer) billingContainer.style.display = 'flex';
+                if (freePlanCard) freePlanCard.style.display = 'block';
+            }
 
             // Settings Modal
             // Settings Modal
