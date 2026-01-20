@@ -597,6 +597,13 @@
             text-align: center;
             margin-top: 8px;
             margin-bottom: 20px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        #btnCancelSub {
+            display: none;
+            /* Hidden by default */
         }
 
         /* Billing Toggle */
@@ -1417,6 +1424,28 @@
                 window.open("https://buy.stripe.com/test_7sYfZa33xd57gz92M0cbC00", "_blank");
             }
         }
+
+        // --- INITIALIZATION ---
+        // Force check of URL params again just to be safe
+        window.addEventListener('load', () => {
+            // Re-check premium URL param
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true' || urlParams.get('payment_status') === 'success') {
+                userPlan = 'premium';
+                localStorage.setItem('nu_brain_plan', 'premium');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // Check LocalStorage
+            userPlan = localStorage.getItem('nu_brain_plan') || 'free';
+
+            // Init Interface
+            updateInterfaceLanguage();
+
+            // Force slider update
+            selectMode(currentMode);
+        });
+
     </script>
 
     <!-- Footer Navigation -->
