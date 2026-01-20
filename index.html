@@ -1104,8 +1104,14 @@
             document.getElementById('lblStatus').textContent = t.settingsModal.statusLabel;
             // removed redundant valStatus set
             document.getElementById('lblRenewal').textContent = t.settingsModal.renewalLabel;
-            document.getElementById('lblRenewal').textContent = t.settingsModal.renewalLabel;
-            document.getElementById('valRenewal').textContent = t.settingsModal.renewalValue;
+
+            // Renewal Date Logic
+            const renewalDate = localStorage.getItem('nu_brain_renewal');
+            if (userPlan === 'premium' && renewalDate) {
+                document.getElementById('valRenewal').textContent = renewalDate;
+            } else {
+                document.getElementById('valRenewal').textContent = t.settingsModal.renewalValue; // "Aucune"
+            }
             document.getElementById('lblUsage').textContent = t.settingsModal.usageLabel;
             // usageValue is dynamic, usually updated separately, but set default here
             // document.getElementById('valUsage').textContent = t.settingsModal.usageValue; 
