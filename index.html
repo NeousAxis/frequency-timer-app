@@ -1504,7 +1504,8 @@
             userPlan = localStorage.getItem('nu_brain_plan') || 'free';
 
             // Update UI elements that depend on userPlan
-            updateInterfaceLanguage(); // This function already updates plan-dependent UI
+            updateInterfaceLanguage();
+            selectMode(currentMode); // Crucial: Re-run mode selection to unlock slider max value based on new plan
         }
 
         // Perform logic check on load
