@@ -1108,8 +1108,8 @@
             if (!isRunning) {
                 let duration = config.duration;
 
-                // Enforce Plan Limits
-                if (userPlan === 'free') {
+                // Enforce Plan Limits - Whitelist approach (only premium gets 60)
+                if (userPlan !== 'premium') {
                     duration = Math.min(duration, 5); // Cap at 5 mins
                     timeSlider.max = 5;
                 } else {
@@ -1133,6 +1133,11 @@
         // Mise à jour du timer (Input)
         timeSlider.addEventListener('input', (e) => {
             if (!isRunning) {
+                // Defense in depth: Force cap locally if max attribute fails or is hacked
+                if (userPlan !== 'premium' && e.target.value > 5) {
+                    e.target.value = 5;
+                }
+
                 timeLeft = e.target.value * 60;
                 updateSessionTimerDisplay();
             }
@@ -1552,7 +1557,7 @@
                     <li>✓ 4 modes binauraux</li>
                     <li>✓ 2 fréquences pures</li>
                     <li>✓ Guide de respiration</li>
-                    <li>✓ Sessions jusqu'à 30 min</li>
+                    <li>✓ Sessions limitées à 5 min</li>
                 </ul>
             </div>
 
