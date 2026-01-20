@@ -598,6 +598,81 @@
             margin-top: 8px;
             margin-bottom: 20px;
         }
+
+        /* Billing Toggle */
+        .billing-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .toggle-label.active {
+            color: var(--text-dark);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .discount-badge {
+            background: #E6FFFA;
+            color: #38B2AC;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-left: 4px;
+        }
     </style>
 </head>
 
@@ -737,8 +812,11 @@
                 },
                 premiumModal: {
                     title: "⭐ Choisir votre Plan",
+                    monthly: "Mensuel",
+                    annual: "Annuel",
+                    discount: "-20%",
                     free: { name: "🆓 Free Brain", price: "Gratuit", features: ["4 modes binauraux", "2 fréquences pures", "Guide de respiration", "Sessions limitées à 5 min"] },
-                    premium: { name: "🧠 Nu Brain", price: "4.99€ / mois", features: ["Tout Free Brain +", "Sessions illimitées", "Fréquences personnalisées", "Patterns respiratoires avancés"] }
+                    premium: { name: "🧠 Nu Brain", priceMonthly: "4.99 € / $ / CHF / mois", priceAnnual: "3.99 € / $ / CHF / mois", billedAnnual: "Facturé 47.90 €/$ / an", features: ["Tout Free Brain +", "Sessions illimitées", "Fréquences personnalisées", "Patterns respiratoires avancés"] }
                 },
                 settingsModal: {
                     title: "⚙️ Réglages",
@@ -785,8 +863,11 @@
                 },
                 premiumModal: {
                     title: "⭐ Choose Your Plan",
+                    monthly: "Monthly",
+                    annual: "Annual",
+                    discount: "-20%",
                     free: { name: "🆓 Free Brain", price: "Free", features: ["4 binaural modes", "2 pure frequencies", "Breathing guide", "Sessions limited to 5 min"] },
-                    premium: { name: "🧠 Nu Brain", price: "$4.99 / month", features: ["Everything in Free Brain +", "Unlimited sessions", "Custom frequencies", "Advanced breathing patterns"] }
+                    premium: { name: "🧠 Nu Brain", priceMonthly: "4.99 € / $ / CHF / month", priceAnnual: "3.99 € / $ / CHF / month", billedAnnual: "Billed 47.90 €/$ / year", features: ["Everything in Free Brain +", "Unlimited sessions", "Custom frequencies", "Advanced breathing patterns"] }
                 },
                 settingsModal: {
                     title: "⚙️ Settings",
@@ -909,8 +990,20 @@
             document.getElementById('freePlanName').textContent = t.premiumModal.free.name;
             document.getElementById('freePlanPrice').textContent = t.premiumModal.free.price;
             document.getElementById('freePlanFeatures').innerHTML = t.premiumModal.free.features.map(f => `<li>✓ ${f}</li>`).join('');
+            // Premium Modal
+            document.getElementById('premiumModalTitle').textContent = t.premiumModal.title;
+            // Toggle Labels
+            document.getElementById('lblMonthly').textContent = t.premiumModal.monthly;
+            document.getElementById('lblAnnual').textContent = t.premiumModal.annual;
+            document.getElementById('lblDiscount').textContent = t.premiumModal.discount;
+
+            document.getElementById('freePlanName').textContent = t.premiumModal.free.name;
+            document.getElementById('freePlanPrice').textContent = t.premiumModal.free.price;
+            document.getElementById('freePlanFeatures').innerHTML = t.premiumModal.free.features.map(f => `<li>✓ ${f}</li>`).join('');
             document.getElementById('premiumPlanName').textContent = t.premiumModal.premium.name;
-            document.getElementById('premiumPlanPrice').textContent = t.premiumModal.premium.price;
+            // Dynamic Price Update based on toggle
+            updatePriceDisplay();
+
             document.getElementById('premiumPlanFeatures').innerHTML = t.premiumModal.premium.features.map(f => `<li>✓ ${f}</li>`).join('');
 
             // Settings Modal
@@ -1222,6 +1315,51 @@
                 document.body.style.overflow = 'auto';
             }
         });
+        });
+
+        // --- Billing Toggle Logic ---
+        let isAnnual = false;
+
+        function toggleBilling() {
+            const toggle = document.getElementById('billingToggle');
+            isAnnual = toggle.checked; // Sync state
+            updatePriceDisplay();
+        }
+
+        function setBilling(type) {
+            const toggle = document.getElementById('billingToggle');
+            if (type === 'annual') {
+                toggle.checked = true;
+                isAnnual = true;
+            } else {
+                toggle.checked = false;
+                isAnnual = false;
+            }
+            updatePriceDisplay();
+        }
+
+        function updatePriceDisplay() {
+            const t = TRANSLATIONS[currentLang].premiumModal;
+            const priceEl = document.getElementById('premiumPlanPrice');
+            const billedEl = document.getElementById('premiumBilledInfo');
+            const lblMonthly = document.getElementById('lblMonthly');
+            const lblAnnual = document.getElementById('lblAnnual');
+
+            if (isAnnual) {
+                priceEl.textContent = t.premium.priceAnnual;
+                billedEl.textContent = t.premium.billedAnnual;
+                billedEl.style.display = 'block';
+
+                lblAnnual.classList.add('active');
+                lblMonthly.classList.remove('active');
+            } else {
+                priceEl.textContent = t.premium.priceMonthly;
+                billedEl.style.display = 'none';
+
+                lblMonthly.classList.add('active');
+                lblAnnual.classList.remove('active');
+            }
+        }
     </script>
 
     <!-- Footer Navigation -->
@@ -1309,6 +1447,18 @@
             <button class="modal-close" onclick="closeModal('premiumModal')">✕</button>
             <h2 id="premiumModalTitle" class="modal-title">⭐ Choisir votre Plan</h2>
 
+            <div class="billing-toggle-container">
+                <span id="lblMonthly" class="toggle-label active" onclick="setBilling('monthly')">Mensuel</span>
+                <label class="switch">
+                    <input type="checkbox" id="billingToggle" onchange="toggleBilling()">
+                    <span class="slider"></span>
+                </label>
+                <div style="display:flex; align-items:center;">
+                    <span id="lblAnnual" class="toggle-label" onclick="setBilling('annual')">Annuel</span>
+                    <span id="lblDiscount" class="discount-badge">-20%</span>
+                </div>
+            </div>
+
             <div class="plan-card">
                 <div id="freePlanName" class="plan-name">🆓 Free Brain</div>
                 <div id="freePlanPrice" class="plan-price">Gratuit</div>
@@ -1322,7 +1472,10 @@
 
             <div class="plan-card premium">
                 <div id="premiumPlanName" class="plan-name">🧠 Nu Brain</div>
-                <div id="premiumPlanPrice" class="plan-price">4.99€ / mois</div>
+                <div id="premiumPlanPrice" class="plan-price">4.99 € / $ / CHF / mois</div>
+                <div id="premiumBilledInfo"
+                    style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 5px; display: none;">Facturé
+                    47.90 €/$ / an</div>
                 <ul id="premiumPlanFeatures" class="plan-features">
                     <li>✓ Tout Free Brain +</li>
                     <li>✓ Sessions illimitées</li>
