@@ -649,7 +649,7 @@
                 infoModal: {
                     title: "🧠 À Propos",
                     binaural: { title: "🎧 Fréquences Binaurales", text: "Les fréquences binaurales sont créées lorsque deux tons légèrement différents sont joués dans chaque oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la différence entre les deux. Cette technique peut induire différents états mentaux selon la fréquence produite." },
-                    effects: { title: "🌊 Effets sur le Cerveau", text: "<strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération<br><strong>Thêta (4-8 Hz)</strong> : Méditation, créativité<br><strong>Alpha (8-14 Hz)</strong> : Relaxation, calme<br><strong>Bêta (14-30 Hz)</strong> : Concentration, alerte<br><strong>Gamma (30+ Hz)</strong> : Cognition élevée, clarté" },
+                    effects: { title: "🌊 Effets sur le Cerveau", text: "<strong>Delta (0.5-4 Hz)</strong> : Sommeil profond, régénération, guérison physique.<br><strong>Thêta (4-8 Hz)</strong> : Méditation profonde, créativité, intuition, hypnose légère.<br><strong>Alpha (8-13 Hz)</strong> : Relaxation éveillée, calme, apprentissage passif.<br><strong>Bêta (13-30 Hz)</strong> : Concentration active, alerte, résolution de problèmes.<br><strong>Gamma (30+ Hz)</strong> : Cognition élevée, clarté mentale, intégration sensorielle." },
                     breathing: { title: "🌬️ Respiration Consciente", text: "La respiration consciente est issue des exercices respiratoires très anciens provenant du <strong>Pranayama</strong>, une discipline millénaire du Yoga. La cohérence cardiaque a vulgarisé ces techniques ancestrales pour les rendre accessibles au plus grand nombre. Elle active le système nerveux parasympathique, réduisant le stress et l'anxiété. Le rythme 5s/5s synchronise le cœur et le cerveau pour un état optimal." },
                     cycles: { title: "🔄 Cycles Respiratoires", text: "<strong>Cohérence Cardiaque</strong> : 5s/5s - Équilibre du système nerveux<br><strong>Respiration Carrée</strong> : 4s/4s/4s/4s - Calme et focus<br><strong>4-7-8</strong> : Inspiration 4s, rétention 7s, expiration 8s - Endormissement" },
                     sources: "📚 Sources :<br><a href='https://pubmed.ncbi.nlm.nih.gov/31031095/' target='_blank'>432 Hz vs 440 Hz - PubMed Study</a><br><a href='https://www.c2.care/en/cardiac-coherence/' target='_blank'>Cardiac Coherence - C2.care</a>"
@@ -689,7 +689,7 @@
                 infoModal: {
                     title: "🧠 About",
                     binaural: { title: "🎧 Binaural Frequencies", text: "Binaural frequencies are created when two slightly different tones are played in each ear. Your brain perceives a third frequency equal to the difference between the two. This technique can induce different mental states depending on the frequency produced." },
-                    effects: { title: "🌊 Effects on the Brain", text: "<strong>Delta (0.5-4 Hz)</strong>: Deep sleep, regeneration<br><strong>Theta (4-8 Hz)</strong>: Meditation, creativity<br><strong>Alpha (8-14 Hz)</strong>: Relaxation, calm<br><strong>Beta (14-30 Hz)</strong>: Concentration, alertness<br><strong>Gamma (30+ Hz)</strong>: High cognition, clarity" },
+                    effects: { title: "🌊 Effects on the Brain", text: "<strong>Delta (0.5-4 Hz)</strong>: Deep sleep, regeneration, physical healing.<br><strong>Theta (4-8 Hz)</strong>: Deep meditation, creativity, intuition, light hypnosis.<br><strong>Alpha (8-13 Hz)</strong>: Awake relaxation, calm, passive learning.<br><strong>Beta (13-30 Hz)</strong>: Active concentration, alertness, problem solving.<br><strong>Gamma (30+ Hz)</strong>: High cognition, mental clarity, sensory integration." },
                     breathing: { title: "🌬️ Conscious Breathing", text: "Conscious breathing originates from ancient breathing exercises from <strong>Pranayama</strong>, a thousand-year-old Yoga discipline. Cardiac coherence has popularized these ancestral techniques to make them accessible to everyone. It activates the parasympathetic nervous system, reducing stress and anxiety. The 5s/5s rhythm synchronizes the heart and brain for an optimal state." },
                     cycles: { title: "🔄 Breathing Cycles", text: "<strong>Cardiac Coherence</strong>: 5s/5s - Nervous system balance<br><strong>Box Breathing</strong>: 4s/4s/4s/4s - Calm and focus<br><strong>4-7-8</strong>: Inhale 4s, hold 7s, exhale 8s - Fall asleep" },
                     sources: "📚 Sources:<br><a href='https://pubmed.ncbi.nlm.nih.gov/31031095/' target='_blank'>432 Hz vs 440 Hz - PubMed Study</a><br><a href='https://www.c2.care/en/cardiac-coherence/' target='_blank'>Cardiac Coherence - C2.care</a>"
@@ -711,9 +711,9 @@
 
         // Configuration des Modes (Updated to use keys only, text injected dynamically)
         const MODES = {
-            relax: { freqL: 432, freqR: 440, pattern: [5, 0, 5, 0], duration: 15, colorL: '#4A90E2', colorR: '#63b3ed' },
+            relax: { freqL: 432, freqR: 442, pattern: [5, 0, 5, 0], duration: 15, colorL: '#4A90E2', colorR: '#63b3ed' },
             focus: { freqL: 300, freqR: 315, pattern: [5, 0, 5, 0], duration: 20, colorL: '#F56565', colorR: '#FC8181' },
-            clarity: { freqL: 174, freqR: 186, pattern: [5, 0, 5, 0], duration: 15, colorL: '#9F7AEA', colorR: '#B794F4' },
+            clarity: { freqL: 400, freqR: 440, pattern: [5, 0, 5, 0], duration: 15, colorL: '#9F7AEA', colorR: '#B794F4' },
             sleep: { freqL: 136.1, freqR: 140, pattern: [5, 0, 5, 0], duration: 30, colorL: '#2C5282', colorR: '#4299E1' },
             pure432: { freqL: 432, freqR: 432, pattern: [5, 0, 5, 0], duration: 10, colorL: '#38A169', colorR: '#48BB78' },
             pure440: { freqL: 440, freqR: 440, pattern: [5, 0, 5, 0], duration: 10, colorL: '#D69E2E', colorR: '#ECC94B' }
