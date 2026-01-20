@@ -13,6 +13,8 @@
             --accent: #FF6B6B;
             --text-dark: #2D3748;
             --text-light: #718096;
+            --success: #48BB78;
+            --danger: #F56565;
             --glass-bg: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 0.8);
             --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
@@ -517,6 +519,85 @@
         .plan-features li {
             margin-bottom: 5px;
         }
+
+        /* Settings Design */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .settings-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .settings-value {
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .status-badge {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .plan-badge {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .btn-outline-danger {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            color: var(--danger);
+            background: transparent;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-danger:hover {
+            background: rgba(245, 101, 101, 0.05);
+            border-color: var(--danger);
+        }
+
+        .btn-outline-primary {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            color: var(--primary);
+            background: transparent;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-primary:hover {
+            background: rgba(74, 144, 226, 0.05);
+            border-color: var(--primary);
+        }
+
+        .settings-note {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -661,10 +742,18 @@
                 },
                 settingsModal: {
                     title: "⚙️ Réglages",
-                    notifications: { title: "🔔 Notifications", text: "Bientôt disponible..." },
-                    theme: { title: "🎨 Thème", text: "Bientôt disponible..." },
-                    stats: { title: "📊 Statistiques", text: "Bientôt disponible..." },
-                    version: { title: "ℹ️ Version", text: "Nu Frequencies v1.0.0" }
+                    currentPlan: "Plan Actuel",
+                    planName: "Free Brain",
+                    statusLabel: "Statut",
+                    statusValue: "Actif",
+                    renewalLabel: "Date de Renouvellement",
+                    renewalValue: "Aucune (Gratuit)",
+                    usageLabel: "Temps d'écoute",
+                    usageValue: "0 min",
+                    cancelBtn: "Annuler l'abonnement",
+                    cancelNote: "Arrête le renouvellement. Le compte reste Pro jusqu'à la fin de la période.",
+                    supportBtn: "Support / Feedback",
+                    dashboardBtn: "Retour"
                 }
             },
             en: {
@@ -701,10 +790,18 @@
                 },
                 settingsModal: {
                     title: "⚙️ Settings",
-                    notifications: { title: "🔔 Notifications", text: "Coming soon..." },
-                    theme: { title: "🎨 Theme", text: "Coming soon..." },
-                    stats: { title: "📊 Statistics", text: "Coming soon..." },
-                    version: { title: "ℹ️ Version", text: "Nu Frequencies v1.0.0" }
+                    currentPlan: "Current Plan",
+                    planName: "Free Brain",
+                    statusLabel: "Status",
+                    statusValue: "Active",
+                    renewalLabel: "Renewal Date",
+                    renewalValue: "None (Free)",
+                    usageLabel: "Listening Time",
+                    usageValue: "0 min",
+                    cancelBtn: "Cancel Subscription",
+                    cancelNote: "Stops renewal. Account stays Pro until period ends.",
+                    supportBtn: "Support / Feedback",
+                    dashboardBtn: "Back to Dashboard"
                 }
             }
         };
@@ -817,15 +914,22 @@
             document.getElementById('premiumPlanFeatures').innerHTML = t.premiumModal.premium.features.map(f => `<li>✓ ${f}</li>`).join('');
 
             // Settings Modal
+            // Settings Modal
             document.getElementById('settingsModalTitle').textContent = t.settingsModal.title;
-            document.getElementById('settingsNotifTitle').textContent = t.settingsModal.notifications.title;
-            document.getElementById('settingsNotifText').textContent = t.settingsModal.notifications.text;
-            document.getElementById('settingsThemeTitle').textContent = t.settingsModal.theme.title;
-            document.getElementById('settingsThemeText').textContent = t.settingsModal.theme.text;
-            document.getElementById('settingsStatsTitle').textContent = t.settingsModal.stats.title;
-            document.getElementById('settingsStatsText').textContent = t.settingsModal.stats.text;
-            document.getElementById('settingsVersionTitle').textContent = t.settingsModal.version.title;
-            document.getElementById('settingsVersionText').textContent = t.settingsModal.version.text;
+            document.getElementById('lblCurrentPlan').textContent = t.settingsModal.currentPlan;
+            document.getElementById('valCurrentPlan').textContent = t.settingsModal.planName;
+            document.getElementById('lblStatus').textContent = t.settingsModal.statusLabel;
+            document.getElementById('valStatus').textContent = t.settingsModal.statusValue;
+            document.getElementById('lblRenewal').textContent = t.settingsModal.renewalLabel;
+            document.getElementById('valRenewal').textContent = t.settingsModal.renewalValue;
+            document.getElementById('lblUsage').textContent = t.settingsModal.usageLabel;
+            // usageValue is dynamic, usually updated separately, but set default here
+            // document.getElementById('valUsage').textContent = t.settingsModal.usageValue; 
+
+            document.getElementById('btnCancelSub').textContent = t.settingsModal.cancelBtn;
+            document.getElementById('noteCancelSub').textContent = t.settingsModal.cancelNote;
+            document.getElementById('btnSupport').textContent = t.settingsModal.supportBtn;
+            document.getElementById('btnBack').textContent = t.settingsModal.dashboardBtn;
         }
 
         function updateButtonText() {
@@ -1237,25 +1341,33 @@
             <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
             <h2 id="settingsModalTitle" class="modal-title">⚙️ Réglages</h2>
 
-            <div class="modal-section">
-                <h3 id="settingsNotifTitle">🔔 Notifications</h3>
-                <p id="settingsNotifText">Bientôt disponible...</p>
+            <div class="settings-row">
+                <span id="lblCurrentPlan" class="settings-label">Plan Actuel</span>
+                <span id="valCurrentPlan" class="plan-badge">FREE BRAIN</span>
+            </div>
+            <div class="settings-row">
+                <span id="lblStatus" class="settings-label">Statut</span>
+                <span id="valStatus" class="status-badge">Actif</span>
+            </div>
+            <div class="settings-row">
+                <span id="lblRenewal" class="settings-label">Date de Renouvellement</span>
+                <span id="valRenewal" class="settings-value">Aucune</span>
+            </div>
+            <div class="settings-row">
+                <span id="lblUsage" class="settings-label">Temps d'écoute</span>
+                <span id="valUsage" class="settings-value">0 min</span>
             </div>
 
-            <div class="modal-section">
-                <h3 id="settingsThemeTitle">🎨 Thème</h3>
-                <p id="settingsThemeText">Bientôt disponible...</p>
-            </div>
+            <button id="btnCancelSub" class="btn-outline-danger">Annuler l'abonnement</button>
+            <div id="noteCancelSub" class="settings-note">Arrête le renouvellement. Le compte reste Pro jusqu'à la fin
+                de la période.</div>
 
-            <div class="modal-section">
-                <h3 id="settingsStatsTitle">📊 Statistiques</h3>
-                <p id="settingsStatsText">Bientôt disponible...</p>
-            </div>
+            <button id="btnSupport" class="btn-outline-primary"
+                onclick="window.location.href='mailto:support@nufrequencies.xyz'">Support / Feedback</button>
 
-            <div class="modal-section">
-                <h3 id="settingsVersionTitle">ℹ️ Version</h3>
-                <p id="settingsVersionText">Nu Frequencies v1.0.0</p>
-            </div>
+            <button id="btnBack" class="btn-outline-primary"
+                style="margin-top: 30px; border-color: transparent; color: var(--text-light);"
+                onclick="closeModal('settingsModal')">Retour</button>
         </div>
     </div>
 
