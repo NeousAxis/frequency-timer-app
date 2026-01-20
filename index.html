@@ -910,6 +910,7 @@
         let isRunning = false;
         let audioCtx, oscL, oscR, gainNode, intervalTimer;
         let timeLeft = 300; // default 5 min for Free tier
+        let isAnnual = false; // Move to top scope to avoid TDZ issues
 
         // Check for Stripe return
         const urlParams = new URLSearchParams(window.location.search);
@@ -1003,11 +1004,6 @@
             document.getElementById('infoCyclesText').innerHTML = t.infoModal.cycles.text;
             document.getElementById('infoSources').innerHTML = t.infoModal.sources;
 
-            // Premium Modal
-            document.getElementById('premiumModalTitle').textContent = t.premiumModal.title;
-            document.getElementById('freePlanName').textContent = t.premiumModal.free.name;
-            document.getElementById('freePlanPrice').textContent = t.premiumModal.free.price;
-            document.getElementById('freePlanFeatures').innerHTML = t.premiumModal.free.features.map(f => `<li>✓ ${f}</li>`).join('');
             // Premium Modal
             document.getElementById('premiumModalTitle').textContent = t.premiumModal.title;
             // Toggle Labels
@@ -1374,7 +1370,7 @@
         // Check for click on modal overlay
 
         // --- Billing Toggle Logic ---
-        let isAnnual = false;
+        // let isAnnual = false; // Moved to top
 
         function toggleBilling() {
             const toggle = document.getElementById('billingToggle');
@@ -1427,24 +1423,28 @@
 
         // --- INITIALIZATION ---
         // Force check of URL params again just to be safe
-        window.addEventListener('load', () => {
-            // Re-check premium URL param
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('success') === 'true' || urlParams.get('payment_status') === 'success') {
-                userPlan = 'premium';
-                localStorage.setItem('nu_brain_plan', 'premium');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+        // --- INITIALIZATION ---
+        // Run immediately (Script is at bottom of body, so DOM is ready)
 
-            // Check LocalStorage
-            userPlan = localStorage.getItem('nu_brain_plan') || 'free';
+        // Re-check premium URL param
+        const urlParamsRefresh = new URLSearchParams(window.location.search);
+        if (urlParamsRefresh.get('success') === 'true' || urlParamsRefresh.get('payment_status') === 'success') {
+            userPlan = 'premium';
+            localStorage.setItem('nu_brain_plan', 'premium');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
-            // Init Interface
-            updateInterfaceLanguage();
+        // Check LocalStorage
+        userPlan = localStorage.getItem('nu_brain_plan') || 'free';
 
-            // Force slider update
-            selectMode(currentMode);
-        });
+        // Init Interface
+        updateInterfaceLanguage();
+
+        // Force slider update
+        selectMode(currentMode);
+
+        // Ensure billing state
+        setBilling('monthly');
 
     </script>
 
