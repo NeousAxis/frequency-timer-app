@@ -1179,6 +1179,8 @@
                     timeSlider.max = 5;
                 } else {
                     timeSlider.max = 60; // Unlock full range
+                    // Force refresh value if it was stuck at 5
+                    if (duration <= 5) duration = config.duration;
                 }
 
                 timeSlider.value = duration;
