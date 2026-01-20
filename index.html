@@ -1172,14 +1172,16 @@
             // Sync Slider only if not running (logic update)
             if (!isRunning) {
                 let duration = config.duration;
+                // Direct read to avoid variable state desync
+                const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
 
                 // Enforce Plan Limits - Whitelist approach (only premium gets 60)
-                if (userPlan !== 'premium') {
+                if (currentPlan !== 'premium') {
                     duration = Math.min(duration, 5); // Cap at 5 mins
                     timeSlider.max = 5;
                 } else {
                     timeSlider.max = 60; // Unlock full range
-                    // Force refresh value if it was stuck at 5
+                    // Force refresh value if it was stuck at 5 or below native duration
                     if (duration <= 5) duration = config.duration;
                 }
 
@@ -1499,25 +1501,18 @@
         // --- INITIALIZATION ---
         // Run immediately (Script is at bottom of body, so DOM is ready)
 
-        function checkSubscriptionStatus() {
-            // Re-check premium URL param
-            const urlParamsRefresh = new URLSearchParams(window.location.search);
-            if (urlParamsRefresh.get('success') === 'true' || urlParamsRefresh.get('payment_status') === 'success') {
-                userPlan = 'premium';
-                localStorage.setItem('nu_brain_plan', 'premium');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+        // Perform logic check on load using the main function defined above
+        try {
+            checkSubscriptionStatus();
+        } catch (e) { console.error(e); }
 
-            // Check LocalStorage
-            userPlan = localStorage.getItem('nu_brain_plan') || 'free';
+        // Force check LocalStorage one last time for UI consistency
+        const finalPlan = localStorage.getItem('nu_brain_plan') || 'free';
+        if (finalPlan === 'premium') userPlan = 'premium';
 
-            // Update UI elements that depend on userPlan
-            updateInterfaceLanguage();
-            selectMode(currentMode); // Crucial: Re-run mode selection to unlock slider max value based on new plan
-        }
-
-        // Perform logic check on load
-        checkSubscriptionStatus();
+        // Init Interface
+        updateInterfaceLanguage();
+        selectMode(currentMode);
 
         // Add listeners for 'storage' and 'focus' to auto-update the UI when the user returns to the tab after payment.
         window.addEventListener('storage', checkSubscriptionStatus);
