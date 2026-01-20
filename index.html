@@ -664,8 +664,8 @@
             <div class="controls">
                 <div class="time-slider-container">
                     <span>Durée</span>
-                    <input type="range" id="timeSlider" min="5" max="60" value="10" step="5">
-                    <span id="timeDisplay" style="width: 45px; text-align: right;">10m</span>
+                    <input type="range" id="timeSlider" min="5" max="5" value="5" step="5">
+                    <span id="timeDisplay" style="width: 45px; text-align: right;">5m</span>
                 </div>
             </div>
         </div>
@@ -737,8 +737,8 @@
                 },
                 premiumModal: {
                     title: "⭐ Choisir votre Plan",
-                    free: { name: "🆓 Free Brain", price: "Gratuit", features: ["4 modes binauraux", "2 fréquences pures", "Guide de respiration", "Sessions jusqu'à 30 min"] },
-                    premium: { name: "🧠 Nu Brain", price: "4.99€ / mois", features: ["Tout Free Brain +", "Sessions illimitées", "Fréquences personnalisées", "Patterns respiratoires avancés", "Sans publicité", "Mode hors-ligne"] }
+                    free: { name: "🆓 Free Brain", price: "Gratuit", features: ["4 modes binauraux", "2 fréquences pures", "Guide de respiration", "Sessions limitées à 5 min"] },
+                    premium: { name: "🧠 Nu Brain", price: "4.99€ / mois", features: ["Tout Free Brain +", "Sessions illimitées", "Fréquences personnalisées", "Patterns respiratoires avancés"] }
                 },
                 settingsModal: {
                     title: "⚙️ Réglages",
@@ -785,8 +785,8 @@
                 },
                 premiumModal: {
                     title: "⭐ Choose Your Plan",
-                    free: { name: "🆓 Free Brain", price: "Free", features: ["4 binaural modes", "2 pure frequencies", "Breathing guide", "Sessions up to 30 min"] },
-                    premium: { name: "🧠 Nu Brain", price: "$4.99 / month", features: ["Everything in Free Brain +", "Unlimited sessions", "Custom frequencies", "Advanced breathing patterns", "Ad-free", "Offline mode"] }
+                    free: { name: "🆓 Free Brain", price: "Free", features: ["4 binaural modes", "2 pure frequencies", "Breathing guide", "Sessions limited to 5 min"] },
+                    premium: { name: "🧠 Nu Brain", price: "$4.99 / month", features: ["Everything in Free Brain +", "Unlimited sessions", "Custom frequencies", "Advanced breathing patterns"] }
                 },
                 settingsModal: {
                     title: "⚙️ Settings",
@@ -820,7 +820,7 @@
         let currentMode = 'relax';
         let isRunning = false;
         let audioCtx, oscL, oscR, gainNode, intervalTimer;
-        let timeLeft = 900; // defaut 15 min
+        let timeLeft = 300; // default 5 min for Free tier
 
         // Éléments DOM
         const btnMain = document.getElementById('mainBtn');
