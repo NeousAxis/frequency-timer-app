@@ -1646,7 +1646,11 @@
 
         // Init Interface
         updateInterfaceLanguage();
-        selectMode(currentMode);
+
+        // Force refresh to ensure active mode text is populated
+        setTimeout(() => {
+            selectMode(currentMode);
+        }, 50);
 
         // Add listeners for 'storage' and 'focus' to auto-update the UI when the user returns to the tab after payment.
         window.addEventListener('storage', checkSubscriptionStatus);
