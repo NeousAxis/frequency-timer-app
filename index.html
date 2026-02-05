@@ -1578,17 +1578,17 @@
         });
 
         function selectModeFromModal(mode) {
+            // Just select the mode, updates UI globally (including modal cards if they have the class)
             selectMode(mode);
+            // Do NOT close or start yet. Waiting for Start Button click.
+        }
+
+        function startMonoSession() {
             closeModal('monoModal');
 
-            // Scroll to top to see changes
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // Start the session immediately for Mono modes
+            // Allow a brief moment for modal close animation if desired, or instant start
             if (!isRunning) {
-                setTimeout(() => {
-                    toggleSession();
-                }, 300); // Slight delay for smooth transition
+                toggleSession();
             }
         }
         // Check for click on modal overlay
@@ -1746,9 +1746,15 @@
                         dynamique.</span>
                 </div>
             </div>
-            <p id="monoModalDesc" style="color:var(--text-light); font-size:0.8rem; line-height:1.4;">
+            <p id="monoModalDesc"
+                style="color:var(--text-light); font-size:0.8rem; line-height:1.4; margin-bottom: 20px;">
                 Ces fréquences pures ne sont pas binaurales...
             </p>
+
+            <button id="btnMonoStart" class="main-action-btn" onclick="startMonoSession()"
+                style="width: 100%; margin-top: 10px;">
+                ▶ Commencer la session
+            </button>
         </div>
     </div>
 
