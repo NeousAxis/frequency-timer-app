@@ -134,8 +134,10 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            /* Center content vertically */
+            height: 100%;
+            /* Fill grid cell exactly */
             min-height: 110px;
-            /* Big touch targets */
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
         }
 
@@ -1650,18 +1652,21 @@
             checkSubscriptionStatus();
         } catch (e) { console.error(e); }
 
-        // Force check LocalStorage one last time for UI consistency
-        const finalPlan = localStorage.getItem('nu_brain_plan') || 'free';
-        if (finalPlan === 'premium') userPlan = 'premium';
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Force check LocalStorage one last time for UI consistency
+            const finalPlan = localStorage.getItem('nu_brain_plan') || 'free';
+            if (finalPlan === 'premium') userPlan = 'premium';
 
-        // Init Interface
-        updateInterfaceLanguage();
+            // Init Interface
+            updateInterfaceLanguage();
 
-        // Ensure currentMode is valid
-        if (!currentMode) currentMode = 'relax';
+            // Ensure currentMode is valid
+            if (!currentMode) currentMode = 'relax';
 
-        // Initialize UI with default mode immediately
-        selectMode(currentMode);
+            // Initialize UI with default mode immediately
+            selectMode(currentMode);
+        });
 
         // Add listeners for 'storage' and 'focus' to auto-update the UI when the user returns to the tab after payment.
         window.addEventListener('storage', checkSubscriptionStatus);
