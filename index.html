@@ -793,20 +793,6 @@
                 <input type="range" id="volumeSlider" min="0" max="100" value="30">
             </div>
 
-            <!-- Screen Toggle -->
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: rgba(255,255,255,0.6); border-radius: 12px;"
-                onclick="toggleScreenSetting()">
-                <span style="font-size: 0.85rem; color: var(--text-dark);">🔆 Garder l'écran allumé</span>
-                <div style="position: relative; width: 50px; height: 28px;">
-                    <div id="screenToggleBg"
-                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #48BB78; transition: 0.3s; border-radius: 28px;">
-                    </div>
-                    <div id="screenToggleKnob"
-                        style="position: absolute; height: 22px; width: 22px; left: 25px; top: 3px; background-color: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    </div>
-                </div>
-            </div>
-
             <button id="mainBtn" class="btn-main" onclick="toggleSession()" style="width: 100%;">
                 <span id="btnIcon">▶</span>
                 <span id="btnText">Commencer la session</span>
@@ -1018,9 +1004,6 @@
         const btnMain = document.getElementById('mainBtn');
         const btnText = document.getElementById('btnText');
         const btnIcon = document.getElementById('btnIcon');
-
-        // Screen Toggle State (must be declared early)
-        let keepScreenOn = true;
         const circle = document.getElementById('breathingCircle');
         const guideText = document.getElementById('guideText');
         const postureHint = document.getElementById('postureHint');
@@ -1482,10 +1465,8 @@
                 // START
                 startAudio();
 
-                // Only keep screen on if toggle is enabled
-                if (keepScreenOn) {
-                    requestWakeLock();
-                }
+                // Always keep screen on during session
+                requestWakeLock();
 
                 isRunning = true;
 
@@ -1731,22 +1712,6 @@
 
         // Ensure billing state
         setBilling('monthly');
-
-        // Screen Toggle Function
-        function toggleScreenSetting() {
-            keepScreenOn = !keepScreenOn;
-            const bg = document.getElementById('screenToggleBg');
-            const knob = document.getElementById('screenToggleKnob');
-            if (bg && knob) {
-                if (keepScreenOn) {
-                    bg.style.backgroundColor = '#48BB78';
-                    knob.style.left = '25px';
-                } else {
-                    bg.style.backgroundColor = '#ccc';
-                    knob.style.left = '3px';
-                }
-            }
-        }
 
     </script>
 
