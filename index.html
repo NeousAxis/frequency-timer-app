@@ -1331,17 +1331,27 @@
 
         // Moteur Audio Binaural
         async function startAudio() {
-            // Create AudioContext on first call
+            // iOS AUDIO UNLOCK: Play a tiny audio to activate the audio session
+            try {
+                const iosUnlock = new Audio('data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5D');
+                iosUnlock.volume = 0.5;
+                await iosUnlock.play();
+                console.log('iOS audio unlocked');
+            } catch (e) {
+                console.log('iOS unlock:', e.message);
+            }
+
+            // Create AudioContext
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
 
-            // CRITICAL: Resume AudioContext immediately (iOS requires this on user gesture)
+            // Resume AudioContext (required on iOS)
             try {
                 await audioCtx.resume();
-                console.log('AudioContext state:', audioCtx.state);
+                console.log('AudioContext:', audioCtx.state);
             } catch (e) {
-                console.error('AudioContext resume failed:', e);
+                console.error('Resume failed:', e);
             }
 
             const config = MODES[currentMode];
