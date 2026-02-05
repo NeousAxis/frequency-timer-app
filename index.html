@@ -1348,72 +1348,73 @@
 
         // Moteur Audio Binaural
         async function startAudio() {
-            // ROBUST iOS Audio Unlock - Forces speaker output
-            // Create and immediately play a short audio to set audio session to "playback" mode
-            const unlockAudio = document.createElement('audio');
-            unlockAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
-            unlockAudio.volume = 0.01; // Very quiet but not silent
-            unlockAudio.play().then(() => {
-                unlockAudio.pause();
-                unlockAudio.remove();
-            }).catch(e => console.log("Audio unlock failed", e));
+            // Create AudioContext on first call
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
 
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-            // Critical for Mobile Browsers: Resume context if suspended
-            if (audioCtx.state === 'suspended') {
+            // CRITICAL: Resume AudioContext immediately (iOS requires this on user gesture)
+            try {
                 await audioCtx.resume();
+                console.log('AudioContext state:', audioCtx.state);
+            } catch (e) {
+                console.error('AudioContext resume failed:', e);
             }
 
             const config = MODES[currentMode];
             const durationSeconds = timeLeft;
-
-            // Check if this is a MONO frequency (L == R)
             const isMonoMode = (config.freqL === config.freqR);
 
-            // Master volume
+            // Get volume (higher multiplier for better audibility)
+            const volume = (volumeSlider.value / 100) * 1.0; // Full volume multiplier
+
+            // Master volume node
             gainNode = audioCtx.createGain();
-            gainNode.gain.value = volumeSlider.value / 100 * 0.8;
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
             gainNode.connect(audioCtx.destination);
 
-            // Channel Left
-            const pannerL = audioCtx.createStereoPanner();
-            pannerL.pan.value = isMonoMode ? 0 : -0.8; // Center for mono, left for binaural
-            pannerL.connect(gainNode);
-
+            // Create oscillator(s)
             oscL = audioCtx.createOscillator();
             oscL.type = 'sine';
             oscL.frequency.value = config.freqL;
-            oscL.connect(pannerL);
 
-            // Channel Right - only create if binaural
-            if (!isMonoMode) {
-                const pannerR = audioCtx.createStereoPanner();
-                pannerR.pan.value = 0.8;
-                pannerR.connect(gainNode);
+            if (isMonoMode) {
+                // MONO: Single oscillator, no panning, direct to gain
+                oscL.connect(gainNode);
+                oscR = null;
+            } else {
+                // BINAURAL: Two oscillators with stereo panning
+                const pannerL = audioCtx.createStereoPanner();
+                pannerL.pan.value = -1; // Full left
+                oscL.connect(pannerL);
+                pannerL.connect(gainNode);
 
                 oscR = audioCtx.createOscillator();
                 oscR.type = 'sine';
                 oscR.frequency.value = config.freqR;
+
+                const pannerR = audioCtx.createStereoPanner();
+                pannerR.pan.value = 1; // Full right
                 oscR.connect(pannerR);
-            } else {
-                // For mono, just use single oscillator (oscL) centered
-                oscR = null;
+                pannerR.connect(gainNode);
             }
 
-            // Fade in
+            // Start oscillators
             const now = audioCtx.currentTime;
-            gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.8, now + 1);
-
             oscL.start(now);
             if (oscR) oscR.start(now);
 
-            // Schedule auto-stop
+            // Fade in over 0.5 seconds
+            gainNode.gain.linearRampToValueAtTime(volume, now + 0.5);
+
+            // Schedule fade out and stop
             const endTime = now + durationSeconds;
+            gainNode.gain.setValueAtTime(volume, endTime - 1);
             gainNode.gain.linearRampToValueAtTime(0, endTime);
             oscL.stop(endTime);
             if (oscR) oscR.stop(endTime);
+
+            console.log('Audio started:', config.freqL, 'Hz, mono:', isMonoMode, 'volume:', volume);
         }
 
         function stopAudio() {
