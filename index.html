@@ -27,7 +27,8 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            /* Clean white background */
             color: var(--text-dark);
             margin: 0;
             min-height: 100vh;
@@ -36,26 +37,38 @@
             align-items: center;
             justify-content: flex-start;
             overflow-x: hidden;
-            padding: 20px 0 80px 0;
-            transition: background 1s ease;
+            padding: 0;
+            /* Remove padding to kill purple borders */
             width: 100%;
         }
 
-        /* Glassmorphism Container */
+        /* Full Screen Container */
         .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: var(--glass-shadow);
+            background: rgba(255, 255, 255, 0.95);
+            /* High opacity for clean app look */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 0;
+            /* No corners */
+            padding: 24px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            /* Safe area */
+            padding-bottom: 90px;
+            /* Space for footer */
+            width: 100%;
+            max-width: 600px;
+            min-height: 100vh;
+            /* Force full screen height */
+            box-shadow: none;
             position: relative;
             z-index: 10;
             text-align: center;
             margin: 0 auto;
+
+            /* Vertical Layout Engine */
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
@@ -78,46 +91,52 @@
         .modes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 16px;
+            margin-bottom: 20px;
+            /* Allow grid to take available space if screen is tall */
+            flex-grow: 1;
+            align-content: center;
+            /* Center cards vertically in the available space */
         }
 
         .section-title {
-            grid-column: 1 / -1;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             color: var(--text-light);
-            font-weight: 600;
-            margin-top: 10px;
-            margin-bottom: 5px;
+            margin: 20px 0 10px 0;
             text-align: left;
-            padding-left: 5px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding-bottom: 5px;
+            font-weight: 600;
         }
 
         .mode-info-box {
-            grid-column: 1 / -1;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-            background: rgba(255, 255, 255, 0.4);
-            padding: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 15px;
             border-radius: 12px;
-            margin-top: 5px;
-            line-height: 1.4;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
             display: none;
-            /* Cache par défaut */
-            border-left: 3px solid var(--primary);
             text-align: left;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
         }
 
         .mode-card {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 15px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            /* Subtle border */
+            padding: 20px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             text-align: left;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 110px;
+            /* Big touch targets */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
         }
 
         .mode-card:hover {
