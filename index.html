@@ -56,6 +56,7 @@
             font-weight: 700;
             margin-bottom: 5px;
             background: linear-gradient(45deg, #2D3748, #4A90E2);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -201,6 +202,7 @@
         input[type="range"] {
             flex: 1;
             height: 6px;
+            appearance: none;
             -webkit-appearance: none;
             background: rgba(0, 0, 0, 0.1);
             border-radius: 3px;
@@ -726,19 +728,6 @@
                     <span class="mode-desc">Delta (3.9Hz)</span>
                 </div>
 
-                <!-- Séparateur -->
-                <div class="section-title">✨ Fréquences Pures (Mono)</div>
-
-                <!-- Nouvelles fréquences pures -->
-                <div class="mode-card" onclick="selectMode('pure432')" data-mode="pure432">
-                    <span class="mode-title">🌍 Naturel</span>
-                    <span class="mode-desc">432 Hz Pur</span>
-                </div>
-                <div class="mode-card" onclick="selectMode('pure440')" data-mode="pure440">
-                    <span class="mode-title">🎵 Standard</span>
-                    <span class="mode-desc">440 Hz Pur</span>
-                </div>
-
                 <div id="modeInfo" class="mode-info-box"></div>
             </div>
 
@@ -808,7 +797,16 @@
                 inhale: "Inspirez...",
                 exhale: "Expirez...",
                 headphoneWarning: "Utilisez des écouteurs stéréo pour l'effet binaural",
-                footer: { info: "Info", premium: "Premium", settings: "Réglages" },
+                headphoneWarning: "Utilisez des écouteurs stéréo pour l'effet binaural",
+                footer: { info: "Info", mono: "Mono", premium: "Premium", settings: "Réglages" },
+                monoModal: {
+                    title: "✨ Fréquences Mono",
+                    desc: "Ces fréquences pures ne sont pas binaurales et peuvent être écoutées sans écouteurs. Elles n'induisent pas le même effet de synchronisation des hémisphères mais offrent une tonalité pure pour l'alignement.",
+                    cards: {
+                        pure432: { title: "🌍 Naturel", desc: "432 Hz Pur" },
+                        pure440: { title: "🎵 Standard", desc: "440 Hz Pur" }
+                    }
+                },
                 infoModal: {
                     title: "🧠 À Propos",
                     binaural: { title: "🎧 Fréquences Binaurales", text: "Les fréquences binaurales sont créées lorsque deux tons légèrement différents sont joués dans chaque oreille. Votre cerveau perçoit alors une troisième fréquence, égale à la différence entre les deux. Cette technique peut induire différents états mentaux selon la fréquence produite." },
@@ -859,7 +857,16 @@
                 inhale: "Inhale...",
                 exhale: "Exhale...",
                 headphoneWarning: "Use stereo headphones for binaural effect",
-                footer: { info: "Info", premium: "Premium", settings: "Settings" },
+                headphoneWarning: "Use stereo headphones for binaural effect",
+                footer: { info: "Info", mono: "Mono", premium: "Premium", settings: "Settings" },
+                monoModal: {
+                    title: "✨ Mono Frequencies",
+                    desc: "These pure frequencies are not binaural and can be listened to without headphones. They do not induce the same hemispheric synchronization effect but offer a pure tone for alignment.",
+                    cards: {
+                        pure432: { title: "🌍 Natural", desc: "432 Hz Pure" },
+                        pure440: { title: "🎵 Standard", desc: "440 Hz Pure" }
+                    }
+                },
                 infoModal: {
                     title: "🧠 About",
                     binaural: { title: "🎧 Binaural Frequencies", text: "Binaural frequencies are created when two slightly different tones are played in each ear. Your brain perceives a third frequency equal to the difference between the two. This technique can induce different mental states depending on the frequency produced." },
@@ -1024,9 +1031,26 @@
             const t = TRANSLATIONS[currentLang];
 
             // Footer labels
+            // Footer labels
             document.getElementById('footerInfoLabel').textContent = t.footer.info;
+            document.getElementById('footerMonoLabel').textContent = t.footer.mono;
             document.getElementById('footerPremiumLabel').textContent = t.footer.premium;
             document.getElementById('footerSettingsLabel').textContent = t.footer.settings;
+
+            // Mono Modal
+            document.getElementById('monoModalTitle').textContent = t.monoModal.title;
+            document.getElementById('monoModalDesc').textContent = t.monoModal.desc;
+
+            // Update Mono Cards text manually since they are in a different container now or ID based
+            // We can target them via data-mode inside the modal
+            const monoCards = document.querySelectorAll('#monoModal .mode-card');
+            monoCards.forEach(card => {
+                const key = card.getAttribute('data-mode');
+                if (t.monoModal.cards[key]) {
+                    card.querySelector('.mode-title').textContent = t.monoModal.cards[key].title;
+                    card.querySelector('.mode-desc').textContent = t.monoModal.cards[key].desc;
+                }
+            });
 
             // Info Modal
             document.getElementById('infoModalTitle').textContent = t.infoModal.title;
@@ -1188,6 +1212,7 @@
                 timeSlider.value = duration;
                 timeLeft = duration * 60;
                 timeDisplay.textContent = duration + 'm';
+                updateSessionTimerDisplay(); // Ensure session view timer is also ready
             }
         }
 
@@ -1224,7 +1249,13 @@
         async function startAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+            // Critical for Mobile Browsers: Resume context if suspended
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+
             const config = MODES[currentMode];
+            const durationSeconds = timeLeft; // Use the current global timeLeft
 
             // Master volume
             gainNode = audioCtx.createGain();
@@ -1256,21 +1287,44 @@
             gainNode.gain.setValueAtTime(0, now);
             gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.5, now + 1);
 
-            oscL.start();
-            oscR.start();
+            oscL.start(now);
+            oscR.start(now);
+
+            // Schedule auto-stop (Backdrop safety for screen off)
+            // We add a small buffer (e.g. 0.5s) to ensure the timer hits 0 in JS before audio cuts,
+            // or we just trust the scheduler.
+            const endTime = now + durationSeconds;
+
+            // We can schedule a fade out too if we want, but hard stop is fine or fade out
+            gainNode.gain.linearRampToValueAtTime(0, endTime);
+            oscL.stop(endTime);
+            oscR.stop(endTime);
         }
 
         function stopAudio() {
-            if (oscL && oscR) {
+            if (audioCtx && gainNode) {
                 const now = audioCtx.currentTime;
+                // Cancel any scheduled future values to stop NOW
+                gainNode.gain.cancelScheduledValues(now);
+                gainNode.gain.setValueAtTime(gainNode.gain.value, now);
                 gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
 
+                if (oscL) {
+                    try {
+                        oscL.stop(now + 0.5);
+                    } catch (e) { /* ignore if already stopped */ }
+                }
+                if (oscR) {
+                    try {
+                        oscR.stop(now + 0.5);
+                    } catch (e) { /* ignore if already stopped */ }
+                }
+
+                // Cleanup refs after fade
                 setTimeout(() => {
-                    oscL.stop();
-                    oscR.stop();
                     oscL = null;
                     oscR = null;
-                }, 500);
+                }, 600);
             }
         }
 
@@ -1319,6 +1373,9 @@
                 setupView.classList.add('hidden-layout');
                 sessionView.classList.add('active');
 
+                // Update timer display IMMEDIATELY before interval starts
+                updateSessionTimerDisplay();
+
                 btnMain.classList.add('active');
                 updateButtonText(); // Use helper
                 btnIcon.textContent = "⏹";
@@ -1326,17 +1383,27 @@
                 // Active le guide respiratoire
                 startBreathingLogic();
 
-                // Countdown
-                intervalTimer = setInterval(() => {
-                    timeLeft--;
-                    updateSessionTimerDisplay();
+                // Countdown logic with timestamp for accuracy
+                const endTime = Date.now() + timeLeft * 1000;
 
-                    if (timeLeft <= 0) {
+                intervalTimer = setInterval(() => {
+                    const now = Date.now();
+                    const remaining = Math.ceil((endTime - now) / 1000);
+
+                    if (remaining < timeLeft) {
+                        timeLeft = remaining;
+                        updateSessionTimerDisplay();
+                    }
+
+                    if (remaining <= 0) {
+                        timeLeft = 0;
+                        updateSessionTimerDisplay();
                         toggleSession(); // Auto stop
                     }
-                }, 1000);
+                }, 200); // Check more frequently for smoothness
 
             } else {
+
                 // STOP
                 stopAudio();
                 releaseWakeLock(); // Release Keep Screen On
@@ -1372,23 +1439,28 @@
             guideText.style.opacity = 1;
             const pattern = MODES[currentMode].pattern; // ex: [4, 4, 4, 4]
 
-            // On enlève l'animation CSS automatique pour la gérer manuellement via JS si besoin
-            // OU on garde CSS pour l'expansion principale et on gère le texte.
-            // Pour être parfaitement synchrone avec 4 phases, il vaut mieux gérer l'animation ici via transition.
-            circle.classList.remove('breathing-active'); // On retire l'ancienne anim CSS simple
-            circle.style.transition = 'transform ease-in-out'; // Transition fluide
+            // Reset state to ensure clean start
+            circle.classList.remove('breathing-active');
+            circle.style.transition = 'none'; // Disable transition for instant reset
+            circle.style.transform = 'scale(1)';
 
-            runBreathPhase(0, pattern);
+            // Force reflow
+            void circle.offsetWidth;
+
+            // Enable transition and start
+            requestAnimationFrame(() => {
+                circle.style.transition = 'transform ease-in-out';
+                runBreathPhase(0, pattern);
+            });
         }
 
         function runBreathPhase(phaseIndex, pattern) {
             if (!isRunning) return;
 
             const duration = pattern[phaseIndex]; // durée en secondes
-            const steps = [TRANSLATIONS[currentLang].inhale, '', TRANSLATIONS[currentLang].exhale, '']; // Empty string for hold if not used
+            const steps = [TRANSLATIONS[currentLang].inhale, '', TRANSLATIONS[currentLang].exhale, ''];
 
             // Update Text
-            // Si durée est 0 (ex: pas de rétention), on saute l'affichage
             if (duration > 0) {
                 guideText.textContent = steps[phaseIndex];
 
@@ -1399,14 +1471,10 @@
                 } else if (phaseIndex === 2) { // Expire -> Petit
                     circle.style.transitionDuration = `${duration}s`;
                     circle.style.transform = 'scale(1)';
-                } else {
-                    // Rétention -> Bouge pas
-                    // circle.style.transform reste tel quel
                 }
             }
 
             // Schedule next phase
-            // Si duration est 0, on passe tout de suite
             let delay = duration * 1000;
 
             breathTimeout = setTimeout(() => {
@@ -1442,6 +1510,14 @@
                 document.body.style.overflow = 'auto';
             }
         });
+
+        function selectModeFromModal(mode) {
+            selectMode(mode);
+            closeModal('monoModal');
+
+            // Scroll to top to see changes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
         // Check for click on modal overlay
 
         // --- Billing Toggle Logic ---
@@ -1539,6 +1615,13 @@
             </svg>
             <span id="footerInfoLabel">Info</span>
         </button>
+        <button class="footer-btn" onclick="openModal('monoModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span id="footerMonoLabel">Mono</span>
+        </button>
         <button class="footer-btn" onclick="openModal('premiumModal')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polygon
@@ -1557,6 +1640,28 @@
             <span id="footerSettingsLabel">Réglages</span>
         </button>
     </nav>
+
+    <!-- Info Modal -->
+    <div id="monoModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('monoModal')">✕</button>
+            <h2 id="monoModalTitle" class="modal-title">✨ Fréquences Mono</h2>
+
+            <div class="modes-grid" style="grid-template-columns: 1fr; margin-bottom: 20px;">
+                <div class="mode-card" onclick="selectModeFromModal('pure432')" data-mode="pure432">
+                    <span class="mode-title">🌍 Naturel</span>
+                    <span class="mode-desc">432 Hz Pur</span>
+                </div>
+                <div class="mode-card" onclick="selectModeFromModal('pure440')" data-mode="pure440">
+                    <span class="mode-title">🎵 Standard</span>
+                    <span class="mode-desc">440 Hz Pur</span>
+                </div>
+            </div>
+            <p id="monoModalDesc" style="color:var(--text-light); font-size:0.9rem; line-height:1.5;">
+                Ces fréquences pures ne sont pas binaurales...
+            </p>
+        </div>
+    </div>
 
     <!-- Info Modal -->
     <div id="infoModal" class="modal-overlay">
