@@ -794,16 +794,17 @@
             </div>
 
             <!-- Screen Toggle -->
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: rgba(255,255,255,0.6); border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: rgba(255,255,255,0.6); border-radius: 12px;"
+                onclick="toggleScreenSetting()">
                 <span style="font-size: 0.85rem; color: var(--text-dark);">🔆 Garder l'écran allumé</span>
-                <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
-                    <input type="checkbox" id="screenToggle" checked style="opacity: 0; width: 0; height: 0;">
-                    <span
-                        style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 28px;"></span>
-                    <span id="screenToggleKnob"
-                        style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
-                </label>
+                <div style="position: relative; width: 50px; height: 28px;">
+                    <div id="screenToggleBg"
+                        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #48BB78; transition: 0.3s; border-radius: 28px;">
+                    </div>
+                    <div id="screenToggleKnob"
+                        style="position: absolute; height: 22px; width: 22px; left: 25px; top: 3px; background-color: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                    </div>
+                </div>
             </div>
 
             <button id="mainBtn" class="btn-main" onclick="toggleSession()" style="width: 100%;">
@@ -1344,9 +1345,15 @@
 
         // Moteur Audio Binaural
         async function startAudio() {
-            // Unlocks iOS Audio Session by playing a silent HTML5 audio track
-            const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMD//////////////////////////////////////////////////////////////////wAAAAA=");
-            silentAudio.play().catch(e => console.log("Silent audio play failed", e));
+            // ROBUST iOS Audio Unlock - Forces speaker output
+            // Create and immediately play a short audio to set audio session to "playback" mode
+            const unlockAudio = document.createElement('audio');
+            unlockAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+            unlockAudio.volume = 0.01; // Very quiet but not silent
+            unlockAudio.play().then(() => {
+                unlockAudio.pause();
+                unlockAudio.remove();
+            }).catch(e => console.log("Audio unlock failed", e));
 
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -1471,9 +1478,8 @@
                 // START
                 startAudio();
 
-                // Only keep screen on if toggle is checked
-                const screenToggle = document.getElementById('screenToggle');
-                if (screenToggle && screenToggle.checked) {
+                // Only keep screen on if toggle is enabled
+                if (keepScreenOn) {
                     requestWakeLock();
                 }
 
@@ -1722,26 +1728,22 @@
         // Ensure billing state
         setBilling('monthly');
 
-        // Screen Toggle Styling
-        const screenToggle = document.getElementById('screenToggle');
-        const screenToggleKnob = document.getElementById('screenToggleKnob');
-        const screenToggleBg = screenToggle ? screenToggle.nextElementSibling : null;
+        // Screen Toggle State
+        let keepScreenOn = true; // Default ON
 
-        function updateScreenToggleStyle() {
-            if (screenToggle && screenToggleKnob && screenToggleBg) {
-                if (screenToggle.checked) {
-                    screenToggleBg.style.backgroundColor = '#48BB78'; // Green
-                    screenToggleKnob.style.left = '25px';
+        function toggleScreenSetting() {
+            keepScreenOn = !keepScreenOn;
+            const bg = document.getElementById('screenToggleBg');
+            const knob = document.getElementById('screenToggleKnob');
+            if (bg && knob) {
+                if (keepScreenOn) {
+                    bg.style.backgroundColor = '#48BB78';
+                    knob.style.left = '25px';
                 } else {
-                    screenToggleBg.style.backgroundColor = '#ccc';
-                    screenToggleKnob.style.left = '3px';
+                    bg.style.backgroundColor = '#ccc';
+                    knob.style.left = '3px';
                 }
             }
-        }
-
-        if (screenToggle) {
-            screenToggle.addEventListener('change', updateScreenToggleStyle);
-            updateScreenToggleStyle(); // Initialize
         }
 
     </script>
