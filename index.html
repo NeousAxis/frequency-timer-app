@@ -753,9 +753,9 @@
                     <span class="mode-title">🌙 Sommeil</span>
                     <span class="mode-desc">Delta (3.9Hz)</span>
                 </div>
-
-                <div id="modeInfo" class="mode-info-box"></div>
             </div>
+
+            <div id="modeInfo" class="mode-info-box"></div>
 
             <!-- Controls (Setup only) -->
             <div class="controls">
@@ -1203,9 +1203,12 @@
             const modeCards = document.querySelectorAll('.mode-card');
             modeCards.forEach(card => {
                 card.classList.remove('active-mode');
-                card.style.borderColor = 'rgba(255,255,255,0.5)';
+                card.style.borderColor = 'rgba(255,255,255,0.5)'; // Reset to subtle default
+                card.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'; // Reset bg
+
                 if (card.dataset.mode === mode) {
                     card.classList.add('active-mode');
+                    // Style override is handled by CSS class .active-mode, but we force border color dynamic
                     card.style.borderColor = config.colorL;
                 }
             });
