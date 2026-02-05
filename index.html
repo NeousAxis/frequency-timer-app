@@ -54,7 +54,7 @@
             padding: 24px;
             padding-top: calc(20px + env(safe-area-inset-top));
             /* Safe area */
-            padding-bottom: 90px;
+            padding-bottom: 110px;
             /* Space for footer */
             width: 100%;
             max-width: 600px;
@@ -69,6 +69,7 @@
             /* Vertical Layout Engine */
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
         }
 
         h1 {
@@ -93,10 +94,6 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
             margin-bottom: 20px;
-            /* Allow grid to take available space if screen is tall */
-            flex-grow: 1;
-            align-content: center;
-            /* Center cards vertically in the available space */
         }
 
         .section-title {
@@ -110,16 +107,19 @@
         }
 
         .mode-info-box {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 15px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+            padding: 20px;
+            border-radius: 20px;
             margin-top: 15px;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            line-height: 1.5;
             color: var(--text-dark);
-            border-left: 4px solid var(--primary);
-            display: none;
+            border-left: 5px solid var(--primary);
+            display: block;
+            /* Visible by default */
             text-align: left;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            width: 100%;
         }
 
         .mode-card {
@@ -1192,55 +1192,61 @@
         }
 
         // Sélection du Mode
-        function selectMode(modeKey) {
-            if (isRunning && currentLang === 'fr') return; // Hack to allow re-selection for lang update if needed, but safer to block logic change
+        // ... (handled later by startAudio)
 
-            // Note: We allow re-selecting same mode just to update text
-
-            // UI Update
-            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-            document.querySelector(`[data-mode="${modeKey}"]`).classList.add('active');
-
-            currentMode = modeKey;
-            const t = TRANSLATIONS[currentLang].modes[modeKey];
-            const config = MODES[modeKey];
-
-            // Update Visuals & Posture
-            circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
-            circle.style.boxShadow = `0 0 30px ${config.colorL}40`;
-            postureHint.textContent = t.posture;
-
-            // Update Info Box
-            if (t.info) {
-                modeInfo.textContent = t.info;
-                modeInfo.style.display = 'block';
-                modeInfo.style.borderColor = config.colorL;
-            } else {
-                modeInfo.style.display = 'none';
+        // UI Updates
+        const modeCards = document.querySelectorAll('.mode-card');
+        modeCards.forEach(card => {
+            card.classList.remove('active-mode');
+            card.style.borderColor = 'rgba(255,255,255,0.5)';
+            if (card.dataset.mode === mode) {
+                card.classList.add('active-mode');
+                card.style.borderColor = config.colorL;
             }
+        });
 
-            // Sync Slider only if not running (logic update)
-            if (!isRunning) {
-                let duration = config.duration;
-                // Direct read to avoid variable state desync
-                const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
-
-                // Enforce Plan Limits - Whitelist approach (only premium gets 60)
-                if (currentPlan !== 'premium') {
-                    duration = Math.min(duration, 5); // Cap at 5 mins
-                    timeSlider.max = 5;
-                } else {
-                    timeSlider.max = 60; // Unlock full range
-                    // Force refresh value if it was stuck at 5 or below native duration
-                    if (duration <= 5) duration = config.duration;
-                }
-
-                timeSlider.value = duration;
-                timeLeft = duration * 60;
-                timeDisplay.textContent = duration + 'm';
-                updateSessionTimerDisplay(); // Ensure session view timer is also ready
-            }
+        // Update Info Box (Always visible as requested)
+        const modeInfo = document.getElementById('modeInfo');
+        if (t.info) {
+            modeInfo.innerHTML = `<strong>${config.title || t.title}</strong><br>${t.info}`;
+            modeInfo.style.display = 'block';
+            modeInfo.style.borderColor = config.colorL;
         }
+
+        // Update Session Title
+        const sessionTitle = document.getElementById('sessionModeTitle');
+        if (sessionTitle) {
+            sessionTitle.textContent = t.title;
+            sessionTitle.style.color = config.colorL;
+        }
+
+        // Update Visuals & Posture
+        circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
+        circle.style.boxShadow = `0 0 30px ${config.colorL}40`;
+        postureHint.textContent = t.posture;
+
+        // Sync Slider only if not running (logic update)
+        if (!isRunning) {
+            let duration = config.duration;
+            // Direct read to avoid variable state desync
+            const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
+
+            // Enforce Plan Limits - Whitelist approach (only premium gets 60)
+            if (currentPlan !== 'premium') {
+                duration = Math.min(duration, 5); // Cap at 5 mins
+                timeSlider.max = 5;
+            } else {
+                timeSlider.max = 60; // Unlock full range
+                // Force refresh value if it was stuck at 5 or below native duration
+                if (duration <= 5) duration = config.duration;
+            }
+
+            timeSlider.value = duration;
+            timeLeft = duration * 60;
+            timeDisplay.textContent = duration + 'm';
+            updateSessionTimerDisplay(); // Ensure session view timer is also ready
+        }
+            }
 
         function updateSessionTimerDisplay() {
             const m = Math.floor(timeLeft / 60);
