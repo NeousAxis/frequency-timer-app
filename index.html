@@ -835,8 +835,8 @@
                     title: "✨ Fréquences Mono",
                     desc: "Ces fréquences pures ne sont pas binaurales et peuvent être écoutées sans écouteurs. Elles n'induisent pas le même effet de synchronisation des hémisphères mais offrent une tonalité pure pour l'alignement.",
                     cards: {
-                        pure432: { title: "🌍 Naturel", desc: "432 Hz Pur" },
-                        pure440: { title: "🎵 Standard", desc: "440 Hz Pur" }
+                        pure432: { title: "🌍 Naturel (432 Hz)", desc: "Ralentit le rythme cardiaque, réduit l'anxiété et favorise la détente émotionnelle. Sensation de clarté et de connexion à la nature." },
+                        pure440: { title: "🎵 Standard (440 Hz)", desc: "Perçu comme plus lumineux et stimulant pour la concentration et la pensée analytique. Vibration dynamique." }
                     }
                 },
                 infoModal: {
@@ -895,8 +895,8 @@
                     title: "✨ Mono Frequencies",
                     desc: "These pure frequencies are not binaural and can be listened to without headphones. They do not induce the same hemispheric synchronization effect but offer a pure tone for alignment.",
                     cards: {
-                        pure432: { title: "🌍 Natural", desc: "432 Hz Pure" },
-                        pure440: { title: "🎵 Standard", desc: "440 Hz Pure" }
+                        pure432: { title: "🌍 Natural (432 Hz)", desc: "Slows heart rate, reduces anxiety and promotes emotional relaxation. Sensation of clarity and connection to nature." },
+                        pure440: { title: "🎵 Standard (440 Hz)", desc: "Perceived as brighter and stimulating for concentration and analytical thinking. Dynamic vibration." }
                     }
                 },
                 infoModal: {
@@ -1222,12 +1222,14 @@
             });
 
             // Then, apply active state to the specific card(s) matching the mode
-            // (Using loop again to catch any duplicates or specific data-mode match)
             modeCards.forEach(card => {
                 if (card.dataset.mode === mode) {
                     card.classList.add('active-mode');
-                    // Force border color from config for dynamic coloring
+                    // Force styles to ENSURE it looks selected
                     card.style.borderColor = config.colorL;
+                    card.style.borderWidth = '2px';
+                    card.style.backgroundColor = '#FFFFFF';
+                    card.style.boxShadow = `0 8px 25px ${config.colorL}40`; // Add colored glow
                 }
             });
 
