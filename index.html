@@ -793,6 +793,19 @@
                 <input type="range" id="volumeSlider" min="0" max="100" value="30">
             </div>
 
+            <!-- Screen Toggle -->
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 12px 15px; background: rgba(255,255,255,0.6); border-radius: 12px;">
+                <span style="font-size: 0.85rem; color: var(--text-dark);">🔆 Garder l'écran allumé</span>
+                <label style="position: relative; display: inline-block; width: 50px; height: 28px;">
+                    <input type="checkbox" id="screenToggle" checked style="opacity: 0; width: 0; height: 0;">
+                    <span
+                        style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: 0.3s; border-radius: 28px;"></span>
+                    <span id="screenToggleKnob"
+                        style="position: absolute; content: ''; height: 22px; width: 22px; left: 3px; bottom: 3px; background-color: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                </label>
+            </div>
+
             <button id="mainBtn" class="btn-main" onclick="toggleSession()" style="width: 100%;">
                 <span id="btnIcon">▶</span>
                 <span id="btnText">Commencer la session</span>
@@ -1457,7 +1470,12 @@
             if (!isRunning) {
                 // START
                 startAudio();
-                requestWakeLock(); // Request Keep Screen On
+
+                // Only keep screen on if toggle is checked
+                const screenToggle = document.getElementById('screenToggle');
+                if (screenToggle && screenToggle.checked) {
+                    requestWakeLock();
+                }
 
                 isRunning = true;
 
@@ -1703,6 +1721,28 @@
 
         // Ensure billing state
         setBilling('monthly');
+
+        // Screen Toggle Styling
+        const screenToggle = document.getElementById('screenToggle');
+        const screenToggleKnob = document.getElementById('screenToggleKnob');
+        const screenToggleBg = screenToggle ? screenToggle.nextElementSibling : null;
+
+        function updateScreenToggleStyle() {
+            if (screenToggle && screenToggleKnob && screenToggleBg) {
+                if (screenToggle.checked) {
+                    screenToggleBg.style.backgroundColor = '#48BB78'; // Green
+                    screenToggleKnob.style.left = '25px';
+                } else {
+                    screenToggleBg.style.backgroundColor = '#ccc';
+                    screenToggleKnob.style.left = '3px';
+                }
+            }
+        }
+
+        if (screenToggle) {
+            screenToggle.addEventListener('change', updateScreenToggleStyle);
+            updateScreenToggleStyle(); // Initialize
+        }
 
     </script>
 
