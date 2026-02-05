@@ -1343,16 +1343,19 @@
             }
 
             const config = MODES[currentMode];
-            const durationSeconds = timeLeft; // Use the current global timeLeft
+            const durationSeconds = timeLeft;
+
+            // Check if this is a MONO frequency (L == R)
+            const isMonoMode = (config.freqL === config.freqR);
 
             // Master volume
             gainNode = audioCtx.createGain();
-            gainNode.gain.value = volumeSlider.value / 100 * 0.8; // Increased volume and safety multiplier
+            gainNode.gain.value = volumeSlider.value / 100 * 0.8;
             gainNode.connect(audioCtx.destination);
 
             // Channel Left
             const pannerL = audioCtx.createStereoPanner();
-            pannerL.pan.value = -0.8; // Reduced separation (was -1) for mono speaker compatibility
+            pannerL.pan.value = isMonoMode ? 0 : -0.8; // Center for mono, left for binaural
             pannerL.connect(gainNode);
 
             oscL = audioCtx.createOscillator();
@@ -1360,15 +1363,20 @@
             oscL.frequency.value = config.freqL;
             oscL.connect(pannerL);
 
-            // Channel Right
-            const pannerR = audioCtx.createStereoPanner();
-            pannerR.pan.value = 0.8; // Reduced separation (was 1) for mono speaker compatibility
-            pannerR.connect(gainNode);
+            // Channel Right - only create if binaural
+            if (!isMonoMode) {
+                const pannerR = audioCtx.createStereoPanner();
+                pannerR.pan.value = 0.8;
+                pannerR.connect(gainNode);
 
-            oscR = audioCtx.createOscillator();
-            oscR.type = 'sine';
-            oscR.frequency.value = config.freqR;
-            oscR.connect(pannerR);
+                oscR = audioCtx.createOscillator();
+                oscR.type = 'sine';
+                oscR.frequency.value = config.freqR;
+                oscR.connect(pannerR);
+            } else {
+                // For mono, just use single oscillator (oscL) centered
+                oscR = null;
+            }
 
             // Fade in
             const now = audioCtx.currentTime;
@@ -1376,15 +1384,13 @@
             gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.8, now + 1);
 
             oscL.start(now);
-            oscR.start(now);
+            if (oscR) oscR.start(now);
 
-            // Schedule auto-stop (Backdrop safety for screen off)
+            // Schedule auto-stop
             const endTime = now + durationSeconds;
-
-            // We can schedule a fade out too if we want, but hard stop is fine or fade out
             gainNode.gain.linearRampToValueAtTime(0, endTime);
             oscL.stop(endTime);
-            oscR.stop(endTime);
+            if (oscR) oscR.stop(endTime);
         }
 
         function stopAudio() {
