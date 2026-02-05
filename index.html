@@ -755,10 +755,7 @@
                 </div>
             </div>
 
-            <div id="modeInfo" class="mode-info-box">
-                <strong>🌿 Relaxation</strong><br>Favorise la détente profonde et la cohérence cardiaque. Idéal pour
-                réduire le stress.
-            </div>
+            <div id="modeInfo" class="mode-info-box"></div>
 
             <!-- Controls (Setup only) -->
             <div class="controls">
@@ -1207,13 +1204,15 @@
             const modeCards = document.querySelectorAll('.mode-card');
             modeCards.forEach(card => {
                 card.classList.remove('active-mode');
-                card.style.borderColor = 'rgba(255,255,255,0.5)'; // Reset to subtle default
-                card.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'; // Reset bg
+                card.style.borderColor = 'rgba(255,255,255,0.5)';
+                card.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'; // Explicit reset for safety
+                card.style.boxShadow = 'none';
 
                 if (card.dataset.mode === mode) {
                     card.classList.add('active-mode');
-                    // Style override is handled by CSS class .active-mode, but we force border color dynamic
                     card.style.borderColor = config.colorL;
+                    // Background handled by class, but ensure no inline style overrides it
+                    card.style.backgroundColor = '';
                 }
             });
 
