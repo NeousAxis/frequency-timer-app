@@ -1198,49 +1198,59 @@
         }
 
         // Sélection du Mode
+        // Sélection du Mode
         function selectMode(mode) {
+            // Logic: If session is running, prevent mode switch unless it's just a refresh
             if (isRunning && mode !== currentMode) return;
 
+            // 1. Update State
             currentMode = mode;
             const config = MODES[mode];
             const t = TRANSLATIONS[currentLang].modes[mode];
 
-            // UI Updates
+            // 2. UI Updates - STRICT RESET
             const modeCards = document.querySelectorAll('.mode-card');
-            modeCards.forEach(card => {
-                card.classList.remove('active-mode');
-                card.style.borderColor = 'rgba(255,255,255,0.5)';
-                card.style.backgroundColor = 'rgba(255, 255, 255, 0.6)'; // Explicit reset for safety
-                card.style.boxShadow = 'none';
 
+            // First, strip everything from everyone
+            modeCards.forEach(card => {
+                card.classList.remove('active-mode'); // Remove class
+                card.style.borderColor = 'rgba(255,255,255,0.5)'; // Reset border
+                // We rely on CSS for background now, ensuring we don't have lingering inline styles
+                card.style.backgroundColor = '';
+                card.style.boxShadow = '';
+            });
+
+            // Then, apply active state to the specific card(s) matching the mode
+            // (Using loop again to catch any duplicates or specific data-mode match)
+            modeCards.forEach(card => {
                 if (card.dataset.mode === mode) {
                     card.classList.add('active-mode');
+                    // Force border color from config for dynamic coloring
                     card.style.borderColor = config.colorL;
-                    // Background handled by class, but ensure no inline style overrides it
-                    card.style.backgroundColor = '';
                 }
             });
 
-            // Update Info Box (Always visible as requested)
+            // 3. Update Info Box
             const modeInfo = document.getElementById('modeInfo');
-            if (t.info) {
-                // Use innerHTML to allow styling
-                modeInfo.innerHTML = `<strong>${config.title || t.title}</strong><br>${t.info}`;
+            if (t && t.info) {
+                // Determine title to use: Config or Translation
+                const title = config.title || t.title;
+                modeInfo.innerHTML = `<strong>${title}</strong><br>${t.info}`;
                 modeInfo.style.display = 'block';
                 modeInfo.style.borderColor = config.colorL;
             } else {
-                modeInfo.style.display = 'block'; // Keep block/layout but maybe empty? User wants "Toujours avoir l'explication". 
-                // Actually if t.info is missing (shouldn't happen), we might hide it, but let's stick to safe 'block' or just default text.
+                // Fallback if no translation found (should not happen)
+                modeInfo.innerHTML = "";
             }
 
-            // Update Session Title
+            // 4. Update Session Title (Session View)
             const sessionTitle = document.getElementById('sessionModeTitle');
             if (sessionTitle) {
                 sessionTitle.innerHTML = t.title;
                 sessionTitle.style.color = config.colorL;
             }
 
-            // Update Visuals & Posture
+            // 5. Update Visuals
             const circle = document.getElementById('breathingCircle');
             if (circle) {
                 circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
@@ -1252,32 +1262,37 @@
                 postureHint.textContent = "🧘 " + t.posture;
             }
 
-            // Sync Slider only if not running (logic update)
+            // 6. Update Sliders (only if not running)
             if (!isRunning) {
-                let duration = config.duration;
-                // Direct read to avoid variable state desync
-                const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
-
-                const timeSlider = document.getElementById('timeSlider');
-                const timeDisplay = document.getElementById('timeDisplay');
-
-                if (timeSlider && timeDisplay) {
-                    // Enforce Plan Limits - Whitelist approach (only premium gets 60)
-                    if (currentPlan !== 'premium') {
-                        duration = Math.min(duration, 5); // Cap at 5 mins
-                        timeSlider.max = 5;
-                    } else {
-                        timeSlider.max = 60; // Unlock full range
-                        // Force refresh value if it was stuck at 5 or below native duration
-                        if (duration <= 5) duration = config.duration;
-                    }
-
-                    timeSlider.value = duration;
-                    timeLeft = duration * 60;
-                    timeDisplay.textContent = duration + 'm';
-                    updateSessionTimerDisplay(); // Ensure session view timer is also ready
-                }
+                // Update duration based on tier
+                updateDurationLimits(config.duration);
             }
+        }
+
+        function updateDurationLimits(baseDuration) {
+            const timeSlider = document.getElementById('timeSlider');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
+
+            if (!timeSlider || !timeDisplay) return;
+
+            let duration = baseDuration;
+
+            if (currentPlan !== 'premium') {
+                duration = Math.min(duration, 5);
+                timeSlider.max = 5;
+            } else {
+                timeSlider.max = 60;
+                // If it was clamped low, restore it
+                if (duration <= 5) duration = baseDuration;
+            }
+
+            timeSlider.value = duration;
+            timeLeft = duration * 60;
+            timeDisplay.textContent = duration + 'm';
+
+            // Sync session view timer
+            updateSessionTimerDisplay();
         }
 
         function updateSessionTimerDisplay() {
