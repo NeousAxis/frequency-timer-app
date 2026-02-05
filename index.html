@@ -1254,6 +1254,10 @@
 
         // Moteur Audio Binaural
         async function startAudio() {
+            // Unlocks iOS Audio Session by playing a silent HTML5 audio track
+            const silentAudio = new Audio("data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMD//////////////////////////////////////////////////////////////////wAAAAA=");
+            silentAudio.play().catch(e => console.log("Silent audio play failed", e));
+
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
             // Critical for Mobile Browsers: Resume context if suspended
@@ -1266,12 +1270,12 @@
 
             // Master volume
             gainNode = audioCtx.createGain();
-            gainNode.gain.value = volumeSlider.value / 100 * 0.5;
+            gainNode.gain.value = volumeSlider.value / 100 * 0.8; // Increased volume and safety multiplier
             gainNode.connect(audioCtx.destination);
 
             // Channel Left
             const pannerL = audioCtx.createStereoPanner();
-            pannerL.pan.value = -1; // Full Left
+            pannerL.pan.value = -0.8; // Reduced separation (was -1) for mono speaker compatibility
             pannerL.connect(gainNode);
 
             oscL = audioCtx.createOscillator();
@@ -1281,7 +1285,7 @@
 
             // Channel Right
             const pannerR = audioCtx.createStereoPanner();
-            pannerR.pan.value = 1; // Full Right
+            pannerR.pan.value = 0.8; // Reduced separation (was 1) for mono speaker compatibility
             pannerR.connect(gainNode);
 
             oscR = audioCtx.createOscillator();
@@ -1292,14 +1296,12 @@
             // Fade in
             const now = audioCtx.currentTime;
             gainNode.gain.setValueAtTime(0, now);
-            gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.5, now + 1);
+            gainNode.gain.linearRampToValueAtTime(volumeSlider.value / 100 * 0.8, now + 1);
 
             oscL.start(now);
             oscR.start(now);
 
             // Schedule auto-stop (Backdrop safety for screen off)
-            // We add a small buffer (e.g. 0.5s) to ensure the timer hits 0 in JS before audio cuts,
-            // or we just trust the scheduler.
             const endTime = now + durationSeconds;
 
             // We can schedule a fade out too if we want, but hard stop is fine or fade out
