@@ -1018,6 +1018,9 @@
         const btnMain = document.getElementById('mainBtn');
         const btnText = document.getElementById('btnText');
         const btnIcon = document.getElementById('btnIcon');
+
+        // Screen Toggle State (must be declared early)
+        let keepScreenOn = true;
         const circle = document.getElementById('breathingCircle');
         const guideText = document.getElementById('guideText');
         const postureHint = document.getElementById('postureHint');
@@ -1728,9 +1731,7 @@
         // Ensure billing state
         setBilling('monthly');
 
-        // Screen Toggle State
-        let keepScreenOn = true; // Default ON
-
+        // Screen Toggle Function
         function toggleScreenSetting() {
             keepScreenOn = !keepScreenOn;
             const bg = document.getElementById('screenToggleBg');
