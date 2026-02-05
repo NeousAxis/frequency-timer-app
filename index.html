@@ -1192,61 +1192,82 @@
         }
 
         // Sélection du Mode
-        // ... (handled later by startAudio)
+        function selectMode(mode) {
+            if (isRunning && mode !== currentMode) return;
 
-        // UI Updates
-        const modeCards = document.querySelectorAll('.mode-card');
-        modeCards.forEach(card => {
-            card.classList.remove('active-mode');
-            card.style.borderColor = 'rgba(255,255,255,0.5)';
-            if (card.dataset.mode === mode) {
-                card.classList.add('active-mode');
-                card.style.borderColor = config.colorL;
-            }
-        });
+            currentMode = mode;
+            const config = MODES[mode];
+            const t = TRANSLATIONS[currentLang].modes[mode];
 
-        // Update Info Box (Always visible as requested)
-        const modeInfo = document.getElementById('modeInfo');
-        if (t.info) {
-            modeInfo.innerHTML = `<strong>${config.title || t.title}</strong><br>${t.info}`;
-            modeInfo.style.display = 'block';
-            modeInfo.style.borderColor = config.colorL;
-        }
+            // UI Updates
+            const modeCards = document.querySelectorAll('.mode-card');
+            modeCards.forEach(card => {
+                card.classList.remove('active-mode');
+                card.style.borderColor = 'rgba(255,255,255,0.5)';
+                if (card.dataset.mode === mode) {
+                    card.classList.add('active-mode');
+                    card.style.borderColor = config.colorL;
+                }
+            });
 
-        // Update Session Title
-        const sessionTitle = document.getElementById('sessionModeTitle');
-        if (sessionTitle) {
-            sessionTitle.textContent = t.title;
-            sessionTitle.style.color = config.colorL;
-        }
-
-        // Update Visuals & Posture
-        circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
-        circle.style.boxShadow = `0 0 30px ${config.colorL}40`;
-        postureHint.textContent = t.posture;
-
-        // Sync Slider only if not running (logic update)
-        if (!isRunning) {
-            let duration = config.duration;
-            // Direct read to avoid variable state desync
-            const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
-
-            // Enforce Plan Limits - Whitelist approach (only premium gets 60)
-            if (currentPlan !== 'premium') {
-                duration = Math.min(duration, 5); // Cap at 5 mins
-                timeSlider.max = 5;
+            // Update Info Box (Always visible as requested)
+            const modeInfo = document.getElementById('modeInfo');
+            if (t.info) {
+                // Use innerHTML to allow styling
+                modeInfo.innerHTML = `<strong>${config.title || t.title}</strong><br>${t.info}`;
+                modeInfo.style.display = 'block';
+                modeInfo.style.borderColor = config.colorL;
             } else {
-                timeSlider.max = 60; // Unlock full range
-                // Force refresh value if it was stuck at 5 or below native duration
-                if (duration <= 5) duration = config.duration;
+                modeInfo.style.display = 'block'; // Keep block/layout but maybe empty? User wants "Toujours avoir l'explication". 
+                // Actually if t.info is missing (shouldn't happen), we might hide it, but let's stick to safe 'block' or just default text.
             }
 
-            timeSlider.value = duration;
-            timeLeft = duration * 60;
-            timeDisplay.textContent = duration + 'm';
-            updateSessionTimerDisplay(); // Ensure session view timer is also ready
-        }
+            // Update Session Title
+            const sessionTitle = document.getElementById('sessionModeTitle');
+            if (sessionTitle) {
+                sessionTitle.innerHTML = t.title;
+                sessionTitle.style.color = config.colorL;
             }
+
+            // Update Visuals & Posture
+            const circle = document.getElementById('breathingCircle');
+            if (circle) {
+                circle.style.background = `radial-gradient(circle at 30% 30%, ${config.colorL}, ${config.colorR})`;
+                circle.style.boxShadow = `0 0 30px ${config.colorL}40`;
+            }
+
+            const postureHint = document.getElementById('postureHint');
+            if (postureHint && t.posture) {
+                postureHint.textContent = "🧘 " + t.posture;
+            }
+
+            // Sync Slider only if not running (logic update)
+            if (!isRunning) {
+                let duration = config.duration;
+                // Direct read to avoid variable state desync
+                const currentPlan = localStorage.getItem('nu_brain_plan') || 'free';
+
+                const timeSlider = document.getElementById('timeSlider');
+                const timeDisplay = document.getElementById('timeDisplay');
+
+                if (timeSlider && timeDisplay) {
+                    // Enforce Plan Limits - Whitelist approach (only premium gets 60)
+                    if (currentPlan !== 'premium') {
+                        duration = Math.min(duration, 5); // Cap at 5 mins
+                        timeSlider.max = 5;
+                    } else {
+                        timeSlider.max = 60; // Unlock full range
+                        // Force refresh value if it was stuck at 5 or below native duration
+                        if (duration <= 5) duration = config.duration;
+                    }
+
+                    timeSlider.value = duration;
+                    timeLeft = duration * 60;
+                    timeDisplay.textContent = duration + 'm';
+                    updateSessionTimerDisplay(); // Ensure session view timer is also ready
+                }
+            }
+        }
 
         function updateSessionTimerDisplay() {
             const m = Math.floor(timeLeft / 60);
