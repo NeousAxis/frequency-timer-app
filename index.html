@@ -929,12 +929,13 @@
 
         // Configuration des Modes (Updated to use keys only, text injected dynamically)
         const MODES = {
-            relax: { freqL: 432, freqR: 442, pattern: [5, 0, 5, 0], duration: 15, colorL: '#4A90E2', colorR: '#63b3ed' },
-            focus: { freqL: 300, freqR: 315, pattern: [5, 0, 5, 0], duration: 20, colorL: '#F56565', colorR: '#FC8181' },
-            clarity: { freqL: 400, freqR: 440, pattern: [5, 0, 5, 0], duration: 15, colorL: '#9F7AEA', colorR: '#B794F4' },
-            sleep: { freqL: 136.1, freqR: 140, pattern: [5, 0, 5, 0], duration: 30, colorL: '#2C5282', colorR: '#4299E1' },
-            pure432: { freqL: 432, freqR: 432, pattern: [5, 0, 5, 0], duration: 10, colorL: '#38A169', colorR: '#48BB78' },
-            pure440: { freqL: 440, freqR: 440, pattern: [5, 0, 5, 0], duration: 10, colorL: '#D69E2E', colorR: '#ECC94B' }
+            relax: { freqL: 200, freqR: 208, pattern: [5, 0, 5, 0], duration: 5, colorL: '#48BB78', colorR: '#38A169', title: "Relaxation" },
+            focus: { freqL: 400, freqR: 415, pattern: [4, 4, 4, 4], duration: 25, colorL: '#F6E05E', colorR: '#D69E2E', title: "Concentration" },
+            clarity: { freqL: 500, freqR: 512, pattern: [5, 2, 5, 2], duration: 15, colorL: '#4A90E2', colorR: '#3182CE', title: "Clarté" },
+            sleep: { freqL: 150, freqR: 153.9, pattern: [4, 7, 8, 0], duration: 45, colorL: '#667EEA', colorR: '#5A67D8', title: "Sommeil" },
+            // Mono / Pure Frequencies (Same L/R)
+            pure432: { freqL: 432, freqR: 432, pattern: [5, 0, 5, 0], duration: 15, colorL: '#38A169', colorR: '#2F855A', title: "Naturel 432Hz" },
+            pure440: { freqL: 440, freqR: 440, pattern: [5, 0, 5, 0], duration: 15, colorL: '#805AD5', colorR: '#6B46C1', title: "Standard 440Hz" }
         };
 
         // État Global
@@ -1575,6 +1576,13 @@
 
             // Scroll to top to see changes
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Start the session immediately for Mono modes
+            if (!isRunning) {
+                setTimeout(() => {
+                    toggleSession();
+                }, 300); // Slight delay for smooth transition
+            }
         }
         // Check for click on modal overlay
 
@@ -1647,10 +1655,11 @@
         // Init Interface
         updateInterfaceLanguage();
 
-        // Force refresh to ensure active mode text is populated
-        setTimeout(() => {
-            selectMode(currentMode);
-        }, 50);
+        // Ensure currentMode is valid
+        if (!currentMode) currentMode = 'relax';
+
+        // Initialize UI with default mode immediately
+        selectMode(currentMode);
 
         // Add listeners for 'storage' and 'focus' to auto-update the UI when the user returns to the tab after payment.
         window.addEventListener('storage', checkSubscriptionStatus);
